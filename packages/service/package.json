@@ -1,0 +1,34 @@
+{
+  "name": "@crystal-ball/service",
+  "version": "1.0.0",
+  "description": "Crystal Ball backend service",
+  "main": "index.js",
+  "author": "Giovanni Gobbi",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "clean": "rimraf node_modules/",
+    "reinstall": "yarn clean && yarn install",
+    "build": "rimraf ./dist && tsc",
+    "start": "ts-node src/index.ts",
+    "precommit": "lint-staged",
+    "typeorm": "ts-node ./node_modules/typeorm/cli.js"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.16",
+    "@types/node-fetch": "^2.5.7",
+    "rimraf": "^3.0.2",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.1.3"
+  },
+  "dependencies": {
+    "@crystal-ball/database": "^1.0.0",
+    "dotenv": "^8.2.0",
+    "node-fetch": "^2.6.1"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "yarn precommit"
+    }
+  }
+}
