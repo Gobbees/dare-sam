@@ -29,5 +29,15 @@ export default class FacebookPage extends BaseEntity {
   })
   pageOwner!: string;
 
+  @Column({
+    name: 'name',
+  })
+  name!: string;
+
+  @Column({
+    name: 'picture',
+  })
+  picture!: string;
+
   // TODO add posts
 }

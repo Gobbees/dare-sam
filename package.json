@@ -4,7 +4,6 @@
   "description": "Crystall Ball Full Stack Codebase",
   "private": true,
   "scripts": {
-    "clean": "lerna run clean",
     "build:web": "lerna run build --scope={@crystal-ball/database,@crystal-ball/web}",
     "build:service": "lerna run build --scope={@crystal-ball/database,@crystal-ball/service}",
     "precommit": "lint-staged"
@@ -27,10 +26,16 @@
     "eslint-config-prettier": "^7.0.0",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-prettier": "^3.2.0",
+    "eslint-plugin-react-hooks": "^4.2.0",
     "husky": "^4.3.6",
     "lerna": "^3.22.1",
     "lint-staged": "^10.5.3",
     "prettier": "^2.2.1",
     "typescript": "^4.1.3"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "yarn precommit"
+    }
   }
 }

@@ -29,8 +29,9 @@ export interface TypeOrmManagerConnectionParameters {
   database: string;
   /**
    * Development mode enabled.
-   * If this is enabled, automatically the database drops the
-   * schema and creates the new schema every time the application starts
+   * If this is enabled, automatically the database
+   * updates the new schema every time the application starts
+   * and extra logging is provided
    */
   developmentMode: boolean;
 }
@@ -48,18 +49,13 @@ export class TypeOrmManager {
       username: connectionParameters.username,
       password: connectionParameters.password,
       database: connectionParameters.database,
-      dropSchema: connectionParameters.developmentMode,
+      debug: connectionParameters.developmentMode,
       synchronize: connectionParameters.developmentMode,
     } as ConnectionOptions);
     console.log(this.connection.entityMetadatas);
   }
 
   public static getConnection() {
-    if (!this.connection) {
-      throw new Error(
-        'The connection has not been initialized. Please initialize it through TypeOrmManager.connect()',
-      );
-    }
     return this.connection;
   }
 }

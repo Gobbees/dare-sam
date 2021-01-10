@@ -10,7 +10,7 @@
     "clean": "rimraf node_modules/",
     "reinstall": "yarn clean && yarn install",
     "build": "rimraf ./dist && tsc",
-    "start": "ts-node src/index.ts",
+    "start": "NODE_ENV=development ts-node src/index.ts",
     "precommit": "lint-staged",
     "typeorm": "ts-node ./node_modules/typeorm/cli.js"
   },

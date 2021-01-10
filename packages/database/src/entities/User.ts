@@ -48,6 +48,12 @@ export default class User extends BaseEntity {
   })
   facebookAccessToken!: string;
 
+  @Column({
+    name: 'is_fb_access_token_llt',
+    nullable: true,
+  })
+  isFacebookAccessTokenLLT!: boolean;
+
   @OneToMany(() => FacebookPage, (facebookPage) => facebookPage.pageOwner)
   facebookPages!: FacebookPage[] | undefined;
 }
