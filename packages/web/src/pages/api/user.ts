@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { getSession, Session } from 'next-auth/client';
 import { Session as NextSession, User } from '@crystal-ball/database';
 import typeOrmConnect from '../../app/utils/typeOrmConnect';
+import { User as ClientUser, FacebookPage } from '../../types/types';
 
 const getUser = async (
   req: NextApiRequest,
@@ -12,12 +13,26 @@ const getUser = async (
     where: { accessToken: session.accessToken },
     select: ['userId'],
   });
-  console.log(JSON.stringify(userId));
   const user = await User.findOneOrFail({
     where: { id: userId },
     relations: ['facebookPages'],
   });
-  res.json(JSON.stringify(user));
+  const pages: FacebookPage[] = [];
+  user.facebookPages?.forEach((page) =>
+    pages.push({
+      pid: page.externalId,
+      pictureUrl: page.picture,
+      name: page.name,
+    }),
+  );
+  const result: ClientUser = {
+    name: user.name || undefined,
+    email: user.email || undefined,
+    image: user.image || undefined,
+    facebookAccessToken: user.facebookAccessToken,
+    facebookPages: pages,
+  };
+  res.json(JSON.stringify(result));
 };
 
 const updateUser = async (

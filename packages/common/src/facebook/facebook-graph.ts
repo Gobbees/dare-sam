@@ -1,23 +1,24 @@
-import fetch from 'node-fetch';
+import axios from 'axios';
 import GraphError from './errors';
 
-const graphAPIVersion = 'v9.0';
-const graphEndpoint = `https://graph.facebook.com/${graphAPIVersion}/`;
+const facebookGraphAPIVersion = 'v9.0';
+const facebookGraphEndpoint = `https://graph.facebook.com/${facebookGraphAPIVersion}/`;
 
 const sendGraphRequest = async (url: string, withGraphEndpoint: boolean) => {
   try {
-    const response = await fetch(
-      `${withGraphEndpoint ? graphEndpoint : ''}${url}`,
+    const response = await axios.get(
+      `${withGraphEndpoint ? facebookGraphEndpoint : ''}${url}`,
     );
-    const body = await response.json();
-    console.log(response.status);
-    if (response.status === 400 && body.error.code === 190) {
+    return response.data;
+  } catch (error) {
+    if (
+      error.response.status === 400 &&
+      error.response.data.error.code === 190
+    ) {
       throw new Error(GraphError.AUTH_EXPIRED);
-    } else if (response.status === 403) {
+    } else if (error.response.status === 403) {
       throw new Error(GraphError.RATE_LIMITED); // TODO add error code check
     }
-    return body;
-  } catch (error) {
     console.error(`Encountered error: ${error.message} while fetching ${url}`);
     return Promise.reject(error);
   }
@@ -48,4 +49,9 @@ const sendPagedRequest = async (url: string) => {
   }
 };
 
-export { sendTokenizedRequest, sendPagedRequest };
+export {
+  sendTokenizedRequest,
+  sendPagedRequest,
+  facebookGraphEndpoint,
+  facebookGraphAPIVersion,
+};

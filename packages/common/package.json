@@ -1,9 +1,9 @@
 {
-  "name": "@crystal-ball/database",
+  "name": "@crystal-ball/common",
   "version": "1.0.0",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
-  "description": "Database Entities and types for Crystal Ball",
+  "description": "Common utils shared across service and web",
   "author": "Giovanni Gobbi",
   "license": "MIT",
   "private": true,
@@ -15,8 +15,6 @@
     "rimraf": "^3.0.2"
   },
   "dependencies": {
-    "pg": "^8.5.1",
-    "reflect-metadata": "^0.1.13",
-    "typeorm": "^0.2.29"
+    "axios": "^0.21.1"
   }
 }

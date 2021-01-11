@@ -1,14 +1,16 @@
 interface FacebookPage {
+  pid: string;
+  pageAccessToken?: string;
   name: string;
-  picture: string;
+  pictureUrl: string;
 }
 
 interface User {
-  name: string;
-  email: string;
-  image: string;
-  facebookAccessToken: string;
-  facebookPages: FacebookPage[];
+  name?: string;
+  email?: string;
+  image?: string;
+  facebookAccessToken?: string;
+  facebookPages?: FacebookPage[];
 }
 
 export type { User, FacebookPage };
