@@ -17,7 +17,7 @@ const AccountPage = () => {
   const [session, loading] = useSession();
   const { user, setUser } = React.useContext(UserContext);
   React.useEffect(() => {
-    if (session && !loading) {
+    if (session && !loading && !user) {
       fetch('/api/user', { method: 'GET' })
         .then((response) => response.json())
         .then((data) => {
@@ -25,7 +25,7 @@ const AccountPage = () => {
           setUser(resUser);
         });
     }
-  }, [session, loading, setUser]);
+  }, [session, loading, user, setUser]);
 
   React.useEffect(() => {
     if (!(session || loading)) {
