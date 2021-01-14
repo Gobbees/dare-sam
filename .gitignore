@@ -36,3 +36,6 @@ yarn-error.log*
 
 tmp/
 temp/
+
+# ormconfig. I decided to avoid using ormconfig.json files in favor of env variables. I use ormconfig.json only to run typeorm from cli
+ormconfig.json
