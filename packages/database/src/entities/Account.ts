@@ -1,6 +1,7 @@
 // NEXT_AUTH REQUIRED
 
 import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
+import BaseEntityWithMetadata from '../baseEntityWithMetadata';
 
 @Index('compound_id', ['compoundId'], { unique: true })
 @Index('accounts_pkey', ['id'], { unique: true })
@@ -8,7 +9,7 @@ import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
 @Index('provider_id', ['providerId'], {})
 @Index('user_id', ['userId'], {})
 @Entity('accounts', { schema: 'public' })
-export default class Accounts {
+export default class Accounts extends BaseEntityWithMetadata {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
@@ -38,16 +39,4 @@ export default class Accounts {
     nullable: true,
   })
   accessTokenExpires!: Date | null;
-
-  @Column('timestamp with time zone', {
-    name: 'created_at',
-    default: () => 'CURRENT_TIMESTAMP',
-  })
-  createdAt!: Date;
-
-  @Column('timestamp with time zone', {
-    name: 'updated_at',
-    default: () => 'CURRENT_TIMESTAMP',
-  })
-  updatedAt!: Date;
 }

@@ -2,10 +2,10 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  BaseEntity,
   ManyToOne,
   OneToMany,
 } from 'typeorm';
+import BaseEntityWithMetadata from '../baseEntityWithMetadata';
 
 // TODO extract these somewhere
 // TODO make a common entity with internalid and externalid
@@ -26,8 +26,8 @@ enum AnalyzedStatus {
   NOT_ANALYZED = 0,
 }
 
-@Entity('comments')
-export default class Comment extends BaseEntity {
+@Entity('facebook_comments')
+export default class FacebookComment extends BaseEntityWithMetadata {
   /**
    * Internal id in the system
    */
@@ -71,9 +71,9 @@ export default class Comment extends BaseEntity {
   })
   analyzedStatus!: AnalyzedStatus;
 
-  @OneToMany(() => Comment, (comment) => comment.replyTo)
-  replies!: Comment[];
+  @OneToMany(() => FacebookComment, (comment) => comment.replyTo)
+  replies!: FacebookComment[];
 
-  @ManyToOne(() => Comment, (comment) => comment.replies)
+  @ManyToOne(() => FacebookComment, (comment) => comment.replies)
   replyTo!: string;
 }

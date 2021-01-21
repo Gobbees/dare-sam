@@ -1,14 +1,9 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  BaseEntity,
-  ManyToOne,
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import BaseEntityWithMetadata from '../baseEntityWithMetadata';
 import User from './User';
 
 @Entity('facebook_pages')
-export default class FacebookPage extends BaseEntity {
+export default class FacebookPage extends BaseEntityWithMetadata {
   /**
    * Internal id in the system
    */

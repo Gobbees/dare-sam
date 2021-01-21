@@ -1,22 +1,17 @@
-import { Entity, PrimaryGeneratedColumn, Column, BaseEntity } from 'typeorm';
-// import { Sources } from '../service';
+import { Entity, PrimaryGeneratedColumn, Column, Index } from 'typeorm';
+import BaseEntityWithMetadata from '../baseEntityWithMetadata';
 
-@Entity('posts')
-export default class Post extends BaseEntity {
+@Entity('facebook_posts')
+@Index('post_id', ['externalId'], { unique: true })
+export default class FacebookPost extends BaseEntityWithMetadata {
   /**
    * Internal id in the system
    */
   @PrimaryGeneratedColumn('uuid')
   internalId!: string;
 
-  // @Column({
-  //   type: 'enum',
-  //   enum: Sources,
-  // })
-  // source!: Sources;
-
   /**
-   * External id (that is the ID used by Facebook, Instagram, ...)
+   * External id (that is the ID used by Facebook)
    */
   @Column({
     name: 'external_id',
@@ -45,6 +40,7 @@ export default class Post extends BaseEntity {
    */
   @Column('simple-array', {
     name: 'comments_ids',
+    nullable: true,
   })
   commentsIds!: string[];
 }

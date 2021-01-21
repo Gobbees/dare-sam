@@ -2,15 +2,15 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  BaseEntity,
   OneToMany,
   Index,
 } from 'typeorm';
+import BaseEntityWithMetadata from '../baseEntityWithMetadata';
 import FacebookPage from './FacebookPage';
 
 @Index('users_pkey', ['id'], { unique: true })
 @Entity('users')
-export default class User extends BaseEntity {
+export default class User extends BaseEntityWithMetadata {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
@@ -28,18 +28,6 @@ export default class User extends BaseEntity {
 
   @Column('character varying', { name: 'image', nullable: true, length: 255 })
   image!: string | null;
-
-  @Column('timestamp with time zone', {
-    name: 'created_at',
-    default: () => 'CURRENT_TIMESTAMP',
-  })
-  createdAt!: Date;
-
-  @Column('timestamp with time zone', {
-    name: 'updated_at',
-    default: () => 'CURRENT_TIMESTAMP',
-  })
-  updatedAt!: Date;
 
   @Column({
     type: 'varchar',

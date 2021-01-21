@@ -42,20 +42,32 @@ export class TypeOrmManager {
   public static async connect(
     connectionParameters: TypeOrmManagerConnectionParameters,
   ) {
-    this.connection = await createConnection({
-      ...defaultParams,
-      host: connectionParameters.host,
-      port: connectionParameters.port,
-      username: connectionParameters.username,
-      password: connectionParameters.password,
-      database: connectionParameters.database,
-      debug: connectionParameters.developmentMode,
-      synchronize: connectionParameters.developmentMode,
-    } as ConnectionOptions);
-    console.log(this.connection.entityMetadatas);
+    if (this.connection) {
+      await this.connection.connect();
+    } else {
+      this.connection = await createConnection({
+        ...defaultParams,
+        host: connectionParameters.host,
+        port: connectionParameters.port,
+        username: connectionParameters.username,
+        password: connectionParameters.password,
+        database: connectionParameters.database,
+        debug: connectionParameters.developmentMode,
+        synchronize: connectionParameters.developmentMode,
+      } as ConnectionOptions);
+    }
   }
 
-  public static getConnection() {
-    return this.connection;
+  public static isConnected() {
+    return this.connection ? this.connection.isConnected : false;
+  }
+
+  /**
+   * Closes the connection if it is established.
+   */
+  public static async maybeCloseConnection() {
+    if (this.connection?.isConnected) {
+      await this.connection.close();
+    }
   }
 }

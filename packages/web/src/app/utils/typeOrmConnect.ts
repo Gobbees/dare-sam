@@ -1,7 +1,7 @@
 import { TypeOrmManager } from '@crystal-ball/database';
 
 const typeOrmConnect = async () => {
-  if (!TypeOrmManager.getConnection()) {
+  if (!TypeOrmManager.isConnected()) {
     await TypeOrmManager.connect({
       host: process.env.POSTGRES_HOST || 'localhost',
       port: parseInt(process.env.POSTGRES_PORT || '5432', 10),

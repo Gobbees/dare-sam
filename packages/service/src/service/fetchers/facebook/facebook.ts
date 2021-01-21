@@ -1,8 +1,5 @@
 /* eslint-disable no-await-in-loop */
-import {
-  sendTokenizedRequest,
-  sendPagedRequest,
-} from '../helpers/graph/graphHelpers';
+import { sendTokenizedRequest, sendPagedRequest } from '@crystal-ball/common';
 import { FacebookPage, FacebookPost, FacebookPostComment } from './types';
 
 const MAX_LIMIT = 100;
@@ -122,7 +119,7 @@ export const fetchFacebookPagePosts = async (
         message: post.message,
         picture: post.picture,
         likeCount: post.likes.summary.total_count,
-        // comments: await fetchFacebookCommentsForPost(post.id, token),
+        comments: await fetchFacebookCommentsForPost(post.id, token, true),
       }),
     );
     if (response.paging && response.paging.next) {

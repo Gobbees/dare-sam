@@ -11,6 +11,7 @@ const sendGraphRequest = async (url: string, withGraphEndpoint: boolean) => {
     );
     return response.data;
   } catch (error) {
+    console.error(JSON.stringify(error, null, 2));
     if (
       error.response.status === 400 &&
       error.response.data.error.code === 190
@@ -36,6 +37,7 @@ const sendTokenizedRequest = async (
     );
     return data;
   } catch (error) {
+    console.log(error.message);
     return undefined;
   }
 };
@@ -45,6 +47,7 @@ const sendPagedRequest = async (url: string) => {
     const data = await sendGraphRequest(url, false);
     return data;
   } catch (error) {
+    console.log(error.message);
     return undefined;
   }
 };
