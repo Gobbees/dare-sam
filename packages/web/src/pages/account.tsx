@@ -1,43 +1,31 @@
 import * as React from 'react';
 import { useRouter } from 'next/router';
-import { useSession } from 'next-auth/client';
 import { Box, Button, Spinner, Text } from '@chakra-ui/react';
 import { AiFillFacebook } from 'react-icons/ai';
-import { UserContext } from '../context/UserContext';
-import { FacebookPage, User } from '../types/types';
+import { FacebookPage } from '../types/types';
 import {
   getFacebookLongLivedToken,
   getFacebookAccessToken,
 } from '../app/api/facebook-tokens';
 import getFacebookPagesForProfile from '../app/api/facebook-pages';
 import PageSelector from '../components/account/PageSelector';
+import useUser from '../hooks/UseUser';
 
 const AccountPage = () => {
   const router = useRouter();
-  const [session, loading] = useSession();
-  const { user, setUser } = React.useContext(UserContext);
-  React.useEffect(() => {
-    if (session && !loading && !user) {
-      fetch('/api/user', { method: 'GET' })
-        .then((response) => response.json())
-        .then((data) => {
-          const resUser: User = data;
-          setUser(resUser);
-        });
-    }
-  }, [session, loading, user, setUser]);
+  const { user, loading, setUser } = useUser();
 
   React.useEffect(() => {
-    if (!(session || loading)) {
+    if (!(user || loading)) {
       router.replace('/login');
     }
-  }, [session, loading, router]);
+  }, [user, loading, router]);
 
   if (loading) {
     return <Spinner></Spinner>;
   }
 
-  return session ? (
+  return user ? (
     <Box maxW="6xl" p={60}>
       <pre>{JSON.stringify(user, null, 2)}</pre>
       <Text fontSize="xl">Your Facebook pages</Text>
