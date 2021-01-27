@@ -15,8 +15,9 @@ const AccountPage = () => {
   const router = useRouter();
   const { user, loading, setUser } = useUser();
 
+  console.log(user, loading);
   React.useEffect(() => {
-    if (!(user || loading)) {
+    if (!user && !loading) {
       router.replace('/login');
     }
   }, [user, loading, router]);

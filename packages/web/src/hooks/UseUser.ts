@@ -1,5 +1,6 @@
 import { Session, useSession } from 'next-auth/client';
 import * as React from 'react';
+import ReactDOM from 'react-dom';
 import { UserContext } from '../context/UserContext';
 import { User } from '../types';
 
@@ -11,23 +12,43 @@ interface UseUserResult {
   errorState?: Error;
 }
 
+interface UseUserState {
+  isLoading: boolean;
+  errorState?: Error;
+}
+
 const useUser = (): UseUserResult => {
-  const [session, loading] = useSession();
+  const [session, isSessionLoading] = useSession();
   const { user, setUser } = React.useContext(UserContext);
-  const [errorState, setErrorState] = React.useState<Error | undefined>(
-    undefined,
-  );
+  const [state, setState] = React.useState<UseUserState>({
+    isLoading: isSessionLoading || !user,
+  });
 
   React.useEffect(() => {
-    if (session && !loading && !user) {
+    if (session && !isSessionLoading && !user) {
+      console.log('fetching user');
       fetch('/api/user', { method: 'GET' })
         .then((response) => response.json())
-        .then((data) => setUser(data as User))
-        .catch((error) => setErrorState(error as Error));
+        .then((data) => {
+          ReactDOM.unstable_batchedUpdates(() => {
+            // to avoid two rerenders
+            setUser(data as User);
+            setState({ errorState: undefined, isLoading: false });
+          });
+        })
+        .catch((error) =>
+          setState({ isLoading: false, errorState: error as Error }),
+        );
     }
-  }, [session, loading, user, setUser, setErrorState]);
+  }, [session, isSessionLoading, user, state, setUser, setState]);
 
-  return { user, session, loading, setUser, errorState };
+  return {
+    user,
+    session,
+    loading: state.isLoading,
+    setUser,
+    errorState: state.errorState,
+  };
 };
 
 export default useUser;
