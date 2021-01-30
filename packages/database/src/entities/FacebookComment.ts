@@ -4,8 +4,10 @@ import {
   Column,
   ManyToOne,
   OneToMany,
+  Index,
 } from 'typeorm';
 import BaseEntityWithMetadata from '../baseEntityWithMetadata';
+import FacebookPost from './FacebookPost';
 
 // TODO extract these somewhere
 // TODO make a common entity with internalid and externalid
@@ -27,6 +29,7 @@ enum AnalyzedStatus {
 }
 
 @Entity('facebook_comments')
+@Index('comment_id', ['externalId'], { unique: true })
 export default class FacebookComment extends BaseEntityWithMetadata {
   /**
    * Internal id in the system
@@ -71,9 +74,12 @@ export default class FacebookComment extends BaseEntityWithMetadata {
   })
   analyzedStatus!: AnalyzedStatus;
 
+  @ManyToOne(() => FacebookPost, (post) => post.comments)
+  post!: FacebookPost;
+
   @OneToMany(() => FacebookComment, (comment) => comment.replyTo)
   replies!: FacebookComment[];
 
   @ManyToOne(() => FacebookComment, (comment) => comment.replies)
-  replyTo!: string;
+  replyTo!: FacebookComment;
 }

@@ -6,7 +6,7 @@ import BaseEntityWithMetadata from '../baseEntityWithMetadata';
 @Index('access_token', ['accessToken'], { unique: true })
 @Index('sessions_pkey', ['id'], { unique: true })
 @Index('session_token', ['sessionToken'], { unique: true })
-@Entity('sessions', { schema: 'public' })
+@Entity('sessions')
 export default class Sessions extends BaseEntityWithMetadata {
   @PrimaryGeneratedColumn('uuid')
   id!: string;

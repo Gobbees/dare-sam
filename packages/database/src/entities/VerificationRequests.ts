@@ -5,7 +5,7 @@ import BaseEntityWithMetadata from '../baseEntityWithMetadata';
 
 @Index('verification_requests_pkey', ['id'], { unique: true })
 @Index('token', ['token'], { unique: true })
-@Entity('verification_requests', { schema: 'public' })
+@Entity('verification_requests')
 export default class VerificationRequests extends BaseEntityWithMetadata {
   @PrimaryGeneratedColumn('uuid')
   id!: string;

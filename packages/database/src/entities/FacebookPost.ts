@@ -1,5 +1,14 @@
-import { Entity, PrimaryGeneratedColumn, Column, Index } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  Index,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
+import { FacebookPage } from '.';
 import BaseEntityWithMetadata from '../baseEntityWithMetadata';
+import FacebookComment from './FacebookComment';
 
 @Entity('facebook_posts')
 @Index('post_id', ['externalId'], { unique: true })
@@ -35,12 +44,9 @@ export default class FacebookPost extends BaseEntityWithMetadata {
   })
   likeCount!: number;
 
-  /**
-   * Array of comments' external ids
-   */
-  @Column('simple-array', {
-    name: 'comments_ids',
-    nullable: true,
-  })
-  commentsIds!: string[];
+  @ManyToOne(() => FacebookPage, (facebookPage) => facebookPage.posts)
+  page!: FacebookPage;
+
+  @OneToMany(() => FacebookComment, (facebookComment) => facebookComment.post)
+  comments!: FacebookComment[];
 }

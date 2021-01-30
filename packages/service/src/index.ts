@@ -1,5 +1,10 @@
-import { FacebookPage, Post, TypeOrmManager } from '@crystal-ball/database';
-import FacebookComment from '../../database/src/entities/FacebookComment';
+/* eslint-disable no-restricted-syntax */
+import {
+  FacebookComment,
+  FacebookPage,
+  FacebookPost,
+  TypeOrmManager,
+} from '@crystal-ball/database';
 import serviceConfig from '../serviceConfig';
 import { fetchFacebookPagePosts } from './service/fetchers/facebook';
 import { fetchAllUsers } from './service/fetchers/fetchUsers';
@@ -27,92 +32,106 @@ const service = async () => {
         username: process.env.POSTGRES_USERNAME || 'postgres',
         password: process.env.POSTGRES_PASSWORD || 'password',
         database: process.env.POSTGRES_DATABASE || 'database',
-        developmentMode: false,
+        developmentMode: true,
       });
     }
+    // fetches posts old 15 days maximum
+    const fetchSince = new Date(
+      new Date().getTime() - 1000 * 60 * 60 * 24 * 15000,
+    );
 
     const users = await fetchAllUsers();
-    console.log(users);
-    // fetches all the comments and updates the db
-    // fetchFacebookData();
-    await Promise.allSettled(
-      users.map(async (user) => {
-        const pages = await FacebookPage.find({
-          where: { pageOwner: user.id },
+    for (const user of users) {
+      const pages = await FacebookPage.find({
+        where: { pageOwner: user.id },
+      });
+      for (const page of pages) {
+        console.log(`Fetching page: ${page.name}`);
+        // const posts: FacebookPost[] = [];
+        const posts = await fetchFacebookPagePosts({
+          pageId: page.externalId,
+          token: user.facebookAccessToken,
+          fromDate: fetchSince,
+          withComments: true,
+          withCommentsReplies: true,
         });
-        await Promise.allSettled(
-          pages?.map(async (page) => {
-            console.log(`Fetching page: ${page.name}`);
-            const posts = await fetchFacebookPagePosts(
-              page.externalId,
-              user.facebookAccessToken,
+        // TODO wrap every function call in a manageCall
+        // that handles all the GraphErrors and reacts accordingly
+        if (!posts) {
+          return;
+        }
+        for (const post of posts) {
+          if (
+            !(await FacebookPost.findOne({ where: { externalId: post.pid } }))
+          ) {
+            // insert new post if not already present
+            const response = await FacebookPost.insert({
+              externalId: post.pid,
+              pictureUrl: post.picture,
+              message: post.message,
+              likeCount: post.likeCount,
+            });
+            console.log(
+              `Added post ${post.pid} with id ${JSON.stringify(
+                response.identifiers[0],
+              )}`,
             );
-            if (!posts) {
-              return;
+          }
+          // if (post.comments?.length) {
+          //   console.log(post.comments[0].replies);
+          // }
+          if (!post.comments) {
+            return;
+          }
+          for (const comment of post.comments) {
+            if (
+              !(await FacebookComment.findOne({
+                where: { externalId: comment.id },
+              }))
+            ) {
+              const response = await FacebookComment.insert({
+                externalId: comment.id,
+                message: comment.message,
+                post: await FacebookPost.findOne({
+                  where: { externalId: post.pid },
+                }),
+              });
+              console.log(
+                `Added comment ${comment.id} with id ${JSON.stringify(
+                  response.identifiers[0],
+                )}`,
+              );
             }
-            await Promise.allSettled(
-              posts.map(async (post) => {
-                if (
-                  !(await Post.findOne({ where: { externalId: post.pid } }))
-                ) {
-                  // insert new post if not already present
-                  const response = await Post.insert({
-                    externalId: post.pid,
-                    pictureUrl: post.picture,
-                    message: post.message,
-                    likeCount: post.likeCount,
-                    commentsIds:
-                      post.comments?.map((comment) => comment.id) || [],
-                  });
-                  console.log(
-                    `Added post ${post.pid} with id ${JSON.stringify(
-                      response.identifiers[0],
-                    )}`,
-                  );
-                }
-                // updates comments
-                await Post.update(
-                  { externalId: post.pid },
-                  {
-                    commentsIds:
-                      post.comments?.map((comment) => comment.id) || [],
-                  },
-                );
-                if (post.comments) {
-                  console.log(post.comments);
-                }
-                if (!post.comments) {
-                  return;
-                }
-                await Promise.allSettled(
-                  post.comments.map(async (comment) => {
-                    if (
-                      !(await FacebookComment.findOne({
-                        where: { externalId: comment.id },
-                      }))
-                    ) {
-                      const response = await FacebookComment.insert({
-                        externalId: comment.id,
-                        message: comment.message,
-                      });
-                      console.log(
-                        `Added comment ${comment.id} with id ${JSON.stringify(
-                          response.identifiers[0],
-                        )}`,
-                      );
-                    }
+            for (const reply of comment.replies || []) {
+              if (
+                !(await FacebookComment.findOne({
+                  where: { externalId: reply.id },
+                }))
+              ) {
+                const response = await FacebookComment.insert({
+                  externalId: reply.id,
+                  message: reply.message,
+                  replyTo: await FacebookComment.findOne({
+                    where: { externalId: reply.replyTo },
                   }),
+                  post: await FacebookPost.findOne({
+                    where: { externalId: post.pid },
+                  }),
+                });
+                console.log(
+                  `Added reply ${comment.id} with id ${JSON.stringify(
+                    response.identifiers[0],
+                  )}`,
                 );
-              }),
-            );
-          }),
-        );
-        // fetchInstagramData();
-        // fetchTwitterData();
-      }),
-    );
-    await TypeOrmManager.maybeCloseConnection();
-    console.log('closed');
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // await TypeOrmManager.maybeCloseConnection();
+    // console.log('closed');
     await sleepFor(serviceConfig.timeInterval);
   }
 };

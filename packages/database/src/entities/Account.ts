@@ -8,7 +8,7 @@ import BaseEntityWithMetadata from '../baseEntityWithMetadata';
 @Index('provider_account_id', ['providerAccountId'], {})
 @Index('provider_id', ['providerId'], {})
 @Index('user_id', ['userId'], {})
-@Entity('accounts', { schema: 'public' })
+@Entity('accounts')
 export default class Accounts extends BaseEntityWithMetadata {
   @PrimaryGeneratedColumn('uuid')
   id!: string;

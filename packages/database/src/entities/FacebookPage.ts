@@ -1,5 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 import BaseEntityWithMetadata from '../baseEntityWithMetadata';
+import FacebookPost from './FacebookPost';
 import User from './User';
 
 @Entity('facebook_pages')
@@ -34,5 +41,6 @@ export default class FacebookPage extends BaseEntityWithMetadata {
   })
   picture!: string;
 
-  // TODO add posts
+  @OneToMany(() => FacebookPost, (facebookPost) => facebookPost.page)
+  posts!: FacebookPost[];
 }

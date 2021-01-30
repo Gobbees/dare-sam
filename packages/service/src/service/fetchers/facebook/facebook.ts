@@ -1,36 +1,16 @@
+// TODO remove it once for loops will be replaced by await Promise.all
+/* eslint-disable no-restricted-syntax */
 /* eslint-disable no-await-in-loop */
 import { sendTokenizedRequest, sendPagedRequest } from '@crystal-ball/common';
-import { FacebookPage, FacebookPost, FacebookPostComment } from './types';
+import { FacebookPost, FacebookPostComment } from './types';
 
+// increase limit in order to have bigger pages and avoid some API calls
 const MAX_LIMIT = 100;
 
-export const fetchFacebookPages = async (
-  token: string,
-): Promise<FacebookPage[] | undefined> => {
-  const response = await sendTokenizedRequest(
-    'me/accounts?fields=id,access_token,name,picture{url}',
-    true,
-    token,
-  );
-  if (!response) {
-    return undefined;
-  }
-  const pages: FacebookPage[] = [];
-  response.data.forEach((page: any) =>
-    pages.push({
-      pid: page.id,
-      pageAccessToken: page.access_token,
-      name: page.name,
-      pictureUrl: page.picture.data.url,
-    }),
-  );
-
-  return pages;
-};
-
 /**
- * Fetches the replies for a comment given its IDs.
- * Includes Paging.
+ * Fetches the replies for a comment given its ID.
+ *
+ * **Includes Paging.**
  * @param commentId the comment id
  * @param comments the comments object in the comments return
  */
@@ -41,14 +21,14 @@ const fetchRepliesForComment = async (
   let response = comments;
   const replies: FacebookPostComment[] = [];
   while ((response.paging && response.paging.next) || response.data.length) {
-    response.data.forEach((reply: any) =>
+    for (const reply of response.data) {
       replies.push({
         id: reply.id,
         likeCount: reply.like_count,
         message: reply.message,
         replyTo: commentId,
-      }),
-    );
+      });
+    }
     if (response.paging && response.paging.next) {
       response = await sendPagedRequest(response.paging.next);
     } else {
@@ -59,34 +39,32 @@ const fetchRepliesForComment = async (
   return replies.length ? replies : undefined;
 };
 
-export const fetchFacebookCommentsForPost = async (
-  postId: string,
-  token: string,
-  withReplies: boolean,
-): Promise<FacebookPostComment[] | undefined> => {
-  let response = await sendTokenizedRequest(
-    `${postId}/comments?fields=id,like_count,message,comments{id,message,like_count}`,
-    true,
-    token,
-  );
-  if (!response) {
-    return undefined;
+/**
+ * Fetches the comments from a Facebook Graph API object.
+ *
+ * **Includes Paging.**
+ * @param comments the Graph API object (will be correctly typed)
+ * @param withReplies should fetch also the comments replies
+ */
+const fetchComments = async (comments: any, withReplies: boolean) => {
+  if (!comments) {
+    return [];
   }
-
-  const comments: FacebookPostComment[] = [];
+  let response = comments;
+  const result: FacebookPostComment[] = [];
   while ((response.paging && response.paging.next) || response.data.length) {
-    response.data.forEach(async (comment: any) => {
+    for (const comment of response.data) {
       const replies =
         withReplies && comment.comments
           ? await fetchRepliesForComment(comment.id, comment.comments)
           : undefined;
-      comments.push({
+      result.push({
         id: comment.id,
         likeCount: comment.like_count,
         message: comment.message,
         replies,
       });
-    });
+    }
     if (response.paging && response.paging.next) {
       response = await sendPagedRequest(response.paging.next);
     } else {
@@ -94,39 +72,97 @@ export const fetchFacebookCommentsForPost = async (
     }
   }
 
-  return comments;
+  return result;
 };
 
-// TODO add option since(date) for fetching only posts that has been created after date
-
-export const fetchFacebookPagePosts = async (
-  pageId: string,
+/**
+ * Fetches the comments for the post defined in options directly from Facebook Graph API.
+ *
+ * **Includes Paging.**
+ * @param options the options
+ * - `postId`: the post ID
+ * - `token`: auth token
+ * - `withReplies`: should fetch also the comments replies
+ */
+export const fetchFacebookCommentsForPost = async (
+  postId: string,
   token: string,
-): Promise<FacebookPost[] | undefined> => {
-  let response = await sendTokenizedRequest(
-    `${pageId}/posts?limit=${MAX_LIMIT}&fields=id,message,picture,likes.summary(true)`,
+  withReplies: boolean,
+): Promise<FacebookPostComment[] | undefined> => {
+  const response = await sendTokenizedRequest(
+    `${postId}/comments?fields=id,message,comments{id,message}`,
     true,
     token,
   );
   if (!response) {
     return undefined;
   }
+  return fetchComments(response, withReplies);
+};
+
+/**
+ * Fetches the comments from the object already retrieved by Facebook Graph API.
+ *
+ * **Includes Paging.**
+ * @param comments the Graph API object (will be correctly typed)
+ * @param withReplies should fetch also the comments replies
+ */
+export const fetchFacebookComments = async (
+  comments: any,
+  withReplies: boolean,
+) => fetchComments(comments, withReplies);
+
+/**
+ * Fetches the Facebook Posts for the input page.
+ *
+ * **Includes Paging.**
+ * @param options
+ * - `pageId`: the page id
+ * - `token`: the auth token
+ * - `fromDate`: fetches posts from a certain date
+ * - `withComments`: should fetch also the posts comments
+ * - `withCommentsReplies`: should fetch also the posts comments replies
+ */
+export const fetchFacebookPagePosts = async (options: {
+  pageId: string;
+  token: string;
+  fromDate: Date;
+  withComments?: boolean;
+  withCommentsReplies?: boolean;
+}): Promise<FacebookPost[] | undefined> => {
+  let url = `${
+    options.pageId
+  }/posts?limit=${MAX_LIMIT}&since=${options.fromDate.toISOString()}&fields=id,message,picture,likes.summary(true)`;
+  if (options.withComments) {
+    url = url.concat(
+      `,comments.order(reverse_chronological){id,message${
+        options.withCommentsReplies
+          ? ',comments.order(reverse_chronological){id,message}'
+          : ''
+      }}`,
+    );
+  }
+  let response = await sendTokenizedRequest(url, true, options.token);
   const posts: FacebookPost[] = [];
   while ((response.paging && response.paging.next) || response.data.length) {
-    response.data.forEach(async (post: any) =>
+    for (const post of response.data) {
       posts.push({
         pid: post.id,
         message: post.message,
         picture: post.picture,
         likeCount: post.likes.summary.total_count,
-        comments: await fetchFacebookCommentsForPost(post.id, token, true),
-      }),
-    );
+        comments: await fetchFacebookComments(
+          post.comments,
+          options.withCommentsReplies || false,
+        ),
+      });
+    }
     if (response.paging && response.paging.next) {
       response = await sendPagedRequest(response.paging.next);
     } else {
       break;
     }
   }
+
   return posts;
 };

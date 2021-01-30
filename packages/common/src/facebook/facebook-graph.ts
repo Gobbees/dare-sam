@@ -1,25 +1,22 @@
-import axios from 'axios';
-import GraphError from './errors';
+import fetch from 'cross-fetch';
+import { findGraphError } from './errors';
 
 const facebookGraphAPIVersion = 'v9.0';
 const facebookGraphEndpoint = `https://graph.facebook.com/${facebookGraphAPIVersion}/`;
 
 const sendGraphRequest = async (url: string, withGraphEndpoint: boolean) => {
   try {
-    const response = await axios.get(
+    const response = await fetch(
       `${withGraphEndpoint ? facebookGraphEndpoint : ''}${url}`,
     );
-    return response.data;
-  } catch (error) {
-    console.error(JSON.stringify(error, null, 2));
-    if (
-      error.response.status === 400 &&
-      error.response.data.error.code === 190
-    ) {
-      throw new Error(GraphError.AUTH_EXPIRED);
-    } else if (error.response.status === 403) {
-      throw new Error(GraphError.RATE_LIMITED); // TODO add error code check
+    // checks for Graph Errors
+    const managedError = await findGraphError(response);
+    if (managedError) {
+      return Promise.reject(managedError);
     }
+    const data = await response.json();
+    return data;
+  } catch (error) {
     console.error(`Encountered error: ${error.message} while fetching ${url}`);
     return Promise.reject(error);
   }
@@ -30,26 +27,16 @@ const sendTokenizedRequest = async (
   doesUrlContainParams: boolean,
   token: string,
 ) => {
-  try {
-    const data = await sendGraphRequest(
-      `${url}${doesUrlContainParams ? '&' : '?'}access_token=${token}`,
-      true,
-    );
-    return data;
-  } catch (error) {
-    console.log(error.message);
-    return undefined;
-  }
+  const data = await sendGraphRequest(
+    `${url}${doesUrlContainParams ? '&' : '?'}access_token=${token}`,
+    true,
+  );
+  return data;
 };
 
 const sendPagedRequest = async (url: string) => {
-  try {
-    const data = await sendGraphRequest(url, false);
-    return data;
-  } catch (error) {
-    console.log(error.message);
-    return undefined;
-  }
+  const data = await sendGraphRequest(url, false);
+  return data;
 };
 
 export {
