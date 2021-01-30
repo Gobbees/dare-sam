@@ -6,7 +6,8 @@
   "scripts": {
     "build:web": "lerna run build --scope={@crystal-ball/common,@crystal-ball/database,@crystal-ball/web}",
     "build:service": "lerna run build --scope={@crystal-ball/common,@crystal-ball/database,@crystal-ball/service}",
-    "precommit": "lint-staged"
+    "precommit": "lint-staged",
+    "postinstall": "husky install"
   },
   "workspaces": {
     "packages": [
@@ -27,7 +28,7 @@
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-prettier": "^3.2.0",
     "eslint-plugin-react-hooks": "^4.2.0",
-    "husky": "^4.3.6",
+    "husky": "^5.0.8",
     "lerna": "^3.22.1",
     "lint-staged": "^10.5.3",
     "prettier": "^2.2.1",
