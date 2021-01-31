@@ -6,10 +6,10 @@ import {
   OneToMany,
   PrimaryColumn,
 } from 'typeorm';
-import { FacebookPage } from '.';
 import BaseEntityWithMetadata from '../BaseEntityWithMetadata';
 import { AnalyzedStatus, Sentiment } from '../commonValues';
 import FacebookComment from './FacebookComment';
+import FacebookPage from './FacebookPage';
 
 @Entity('facebook_posts')
 @Index('post_pkey', ['id'], { unique: true })
