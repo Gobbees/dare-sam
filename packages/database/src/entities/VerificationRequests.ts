@@ -1,7 +1,7 @@
 // NEXT_AUTH_REQUIRED
 
 import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
-import BaseEntityWithMetadata from '../BaseEntityWithMetadata';
+import BaseEntityWithMetadata from '../baseEntity';
 
 @Index('verification_requests_pkey', ['id'], { unique: true })
 @Index('token', ['token'], { unique: true })

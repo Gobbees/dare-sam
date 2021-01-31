@@ -8,7 +8,7 @@ import {
   IsNull,
   Not,
 } from 'typeorm';
-import BaseEntityWithMetadata from '../BaseEntityWithMetadata';
+import BaseEntityWithMetadata from '../baseEntity';
 import FacebookPost from './FacebookPost';
 import { AnalyzedStatus, EntitySentiment, Sentiment } from '../commonValues';
 
