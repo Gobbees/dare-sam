@@ -9,7 +9,7 @@ interface FacebookPostComment {
 
 interface FacebookPost {
   // TODO
-  pid: string;
+  id: string;
   message?: string;
   picture?: string;
   likeCount: number;

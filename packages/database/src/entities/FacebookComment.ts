@@ -1,49 +1,24 @@
 import {
   Entity,
-  PrimaryGeneratedColumn,
   Column,
   ManyToOne,
   OneToMany,
   Index,
+  PrimaryColumn,
+  IsNull,
+  Not,
 } from 'typeorm';
-import BaseEntityWithMetadata from '../baseEntityWithMetadata';
+import BaseEntityWithMetadata from '../BaseEntityWithMetadata';
 import FacebookPost from './FacebookPost';
-
-// TODO extract these somewhere
-// TODO make a common entity with internalid and externalid
-
-enum Sentiment {
-  POSITIVE = 1,
-  MIXED = 0,
-  NEGATIVE = -1,
-}
-
-interface EntitySentiment {
-  entity: string;
-  sentiment: Sentiment;
-}
-
-enum AnalyzedStatus {
-  ANALYZED = 1,
-  NOT_ANALYZED = 0,
-}
+import { AnalyzedStatus, EntitySentiment, Sentiment } from '../commonValues';
 
 @Entity('facebook_comments')
-@Index('comment_id', ['externalId'], { unique: true })
+@Index('comment_id', ['id'], { unique: true })
 export default class FacebookComment extends BaseEntityWithMetadata {
-  /**
-   * Internal id in the system
-   */
-  @PrimaryGeneratedColumn('uuid')
-  internalId!: string;
-
-  /**
-   * External id (that is the ID used by Facebook, Instagram, ...)
-   */
-  @Column({
-    name: 'external_id',
+  @PrimaryColumn({
+    name: 'id',
   })
-  externalId!: string;
+  id!: string;
 
   @Column({
     name: 'message',
@@ -70,7 +45,7 @@ export default class FacebookComment extends BaseEntityWithMetadata {
     type: 'enum',
     enum: AnalyzedStatus,
     name: 'analyzed_status',
-    default: AnalyzedStatus.NOT_ANALYZED,
+    default: AnalyzedStatus.UNANALYZED,
   })
   analyzedStatus!: AnalyzedStatus;
 
@@ -82,4 +57,17 @@ export default class FacebookComment extends BaseEntityWithMetadata {
 
   @ManyToOne(() => FacebookComment, (comment) => comment.replies)
   replyTo!: FacebookComment;
+
+  // Queries
+
+  static findUnanalyzedByPost = async (post: FacebookPost) => {
+    const result = await FacebookComment.find({
+      where: {
+        post,
+        analyzedStatus: AnalyzedStatus.UNANALYZED,
+        message: Not(IsNull()),
+      },
+    });
+    return result;
+  };
 }

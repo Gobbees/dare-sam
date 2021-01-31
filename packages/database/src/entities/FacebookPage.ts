@@ -1,29 +1,22 @@
 import {
   Entity,
-  PrimaryGeneratedColumn,
   Column,
   ManyToOne,
   OneToMany,
+  PrimaryColumn,
+  Index,
 } from 'typeorm';
-import BaseEntityWithMetadata from '../baseEntityWithMetadata';
+import BaseEntityWithMetadata from '../BaseEntityWithMetadata';
 import FacebookPost from './FacebookPost';
 import User from './User';
 
 @Entity('facebook_pages')
+@Index('page_pkey', ['id'], { unique: true })
 export default class FacebookPage extends BaseEntityWithMetadata {
-  /**
-   * Internal id in the system
-   */
-  @PrimaryGeneratedColumn('uuid')
-  internalId!: string;
-
-  /**
-   * External id (that is the ID used by Facebook, Instagram, ...)
-   */
-  @Column({
-    name: 'external_id',
+  @PrimaryColumn({
+    name: 'id',
   })
-  externalId!: string;
+  id!: string;
 
   @ManyToOne(() => User, (user) => user.facebookPages)
   @Column({

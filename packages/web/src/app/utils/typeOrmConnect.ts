@@ -8,7 +8,7 @@ const typeOrmConnect = async () => {
       username: process.env.POSTGRES_USERNAME || 'postgres',
       password: process.env.POSTGRES_PASSWORD || 'password',
       database: process.env.POSTGRES_DATABASE || 'database',
-      developmentMode: false, // process.env.NODE_ENV === 'development',
+      developmentMode: process.env.NODE_ENV === 'development',
     });
   }
 };

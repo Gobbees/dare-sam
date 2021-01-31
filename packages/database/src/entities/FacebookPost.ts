@@ -1,31 +1,23 @@
 import {
   Entity,
-  PrimaryGeneratedColumn,
   Column,
   Index,
   ManyToOne,
   OneToMany,
+  PrimaryColumn,
 } from 'typeorm';
 import { FacebookPage } from '.';
-import BaseEntityWithMetadata from '../baseEntityWithMetadata';
+import BaseEntityWithMetadata from '../BaseEntityWithMetadata';
+import { AnalyzedStatus, Sentiment } from '../commonValues';
 import FacebookComment from './FacebookComment';
 
 @Entity('facebook_posts')
-@Index('post_id', ['externalId'], { unique: true })
+@Index('post_pkey', ['id'], { unique: true })
 export default class FacebookPost extends BaseEntityWithMetadata {
-  /**
-   * Internal id in the system
-   */
-  @PrimaryGeneratedColumn('uuid')
-  internalId!: string;
-
-  /**
-   * External id (that is the ID used by Facebook)
-   */
-  @Column({
-    name: 'external_id',
+  @PrimaryColumn({
+    name: 'id',
   })
-  externalId!: string;
+  id!: string;
 
   @Column({
     name: 'message',
@@ -43,6 +35,28 @@ export default class FacebookPost extends BaseEntityWithMetadata {
     name: 'like_count',
   })
   likeCount!: number;
+
+  @Column({
+    type: 'enum',
+    enum: Sentiment,
+    name: 'post_sentiment',
+    nullable: true,
+  })
+  postSentiment!: Sentiment;
+
+  @Column({
+    type: 'enum',
+    enum: AnalyzedStatus,
+    name: 'analyzed_status',
+    default: AnalyzedStatus.UNANALYZED,
+  })
+  analyzedStatus!: AnalyzedStatus;
+
+  @Column({
+    name: 'comments_overall_sentiment',
+    nullable: true,
+  })
+  commentsOverallSentiment!: number;
 
   @ManyToOne(() => FacebookPage, (facebookPage) => facebookPage.posts)
   page!: FacebookPage;

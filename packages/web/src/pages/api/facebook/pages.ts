@@ -17,7 +17,7 @@ const createPage = async (
 
   try {
     await FacebookPage.insert({
-      externalId: page.pid,
+      id: page.pid,
       name: page.name,
       picture: page.pictureUrl,
       pageOwner: userId,

@@ -5,7 +5,7 @@ import {
   OneToMany,
   Index,
 } from 'typeorm';
-import BaseEntityWithMetadata from '../baseEntityWithMetadata';
+import BaseEntityWithMetadata from '../BaseEntityWithMetadata';
 import FacebookPage from './FacebookPage';
 
 @Index('users_pkey', ['id'], { unique: true })
