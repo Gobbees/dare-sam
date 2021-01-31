@@ -1,7 +1,7 @@
 // NEXT_AUTH REQUIRED
 
 import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
-import BaseEntityWithMetadata from '../BaseEntityWithMetadata';
+import BaseEntityWithMetadata from '../baseEntity';
 
 @Index('compound_id', ['compoundId'], { unique: true })
 @Index('accounts_pkey', ['id'], { unique: true })

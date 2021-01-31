@@ -6,7 +6,7 @@ import {
   PrimaryColumn,
   Index,
 } from 'typeorm';
-import BaseEntityWithMetadata from '../BaseEntityWithMetadata';
+import BaseEntityWithMetadata from '../baseEntity';
 import FacebookPost from './FacebookPost';
 import User from './User';
 

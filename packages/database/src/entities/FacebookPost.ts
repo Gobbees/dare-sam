@@ -6,7 +6,7 @@ import {
   OneToMany,
   PrimaryColumn,
 } from 'typeorm';
-import BaseEntityWithMetadata from '../BaseEntityWithMetadata';
+import BaseEntityWithMetadata from '../baseEntity';
 import { AnalyzedStatus, Sentiment } from '../commonValues';
 import FacebookComment from './FacebookComment';
 import FacebookPage from './FacebookPage';
