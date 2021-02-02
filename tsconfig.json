@@ -4,6 +4,7 @@
     "module": "commonjs",
     "allowJs": false,
     "strict": true,
+    "jsx": "react",
     "noImplicitAny": true,
     "moduleResolution": "node",
     "paths": {
@@ -15,5 +16,6 @@
     "forceConsistentCasingInFileNames": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true
-  }
+  },
+  "exclude": ["node_modules"]
 }
