@@ -1,5 +1,5 @@
 import { sendTokenizedRequest } from '@crystal-ball/common';
-import { FacebookPage } from '../../types';
+import { FacebookPage } from '../../../types';
 
 const getFacebookPagesForProfile = async (authToken: string) => {
   const response = await sendTokenizedRequest(
@@ -13,7 +13,7 @@ const getFacebookPagesForProfile = async (authToken: string) => {
   const pages: FacebookPage[] = [];
   response.data.forEach((page: any) =>
     pages.push({
-      pid: page.id,
+      id: page.id,
       pageAccessToken: page.access_token,
       name: page.name,
       pictureUrl: page.picture.data.url,

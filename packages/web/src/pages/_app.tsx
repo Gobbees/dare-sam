@@ -1,9 +1,12 @@
 import { AppProps } from 'next/app';
-import { Provider } from 'next-auth/client';
+import { Provider as NextAuthProvider } from 'next-auth/client';
 import * as React from 'react';
+import { QueryClient, QueryClientProvider } from 'react-query';
 import { ChakraProvider } from '@chakra-ui/react';
 import { defaultUserValue, UserContext } from '../context/UserContext';
 import { User } from '../types/types';
+
+const queryClient = new QueryClient();
 
 function MyApp({ Component, pageProps }: AppProps) {
   const [userInfo, setUserInfo] = React.useState<User | undefined>(
@@ -11,13 +14,15 @@ function MyApp({ Component, pageProps }: AppProps) {
   );
 
   return (
-    <Provider session={pageProps.session}>
+    <NextAuthProvider session={pageProps.session}>
       <ChakraProvider>
         <UserContext.Provider value={{ user: userInfo, setUser: setUserInfo }}>
-          <Component {...pageProps} />
+          <QueryClientProvider client={queryClient}>
+            <Component {...pageProps} />
+          </QueryClientProvider>
         </UserContext.Provider>
       </ChakraProvider>
-    </Provider>
+    </NextAuthProvider>
   );
 }
 

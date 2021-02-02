@@ -16,11 +16,6 @@ import submitToSentimentAnalysisService, {
   SentimentAnalysisServiceRequest,
 } from '../sentiment-analysis';
 
-export const fetchPagesSince = new Date(
-  new Date().getTime() -
-    1000 * 60 * 60 * 24 * (process.env.NODE_ENV === 'development' ? 15000 : 15),
-);
-
 const fetchUnanalyzedAndSubmitToSA = async (page: FacebookPage) => {
   //   const unanalyzedPosts = fetchUnanalyzedPosts(pageId);
   const unanalyzedComments: Array<FacebookComment> = [];
@@ -51,7 +46,15 @@ const fetchUnanalyzedAndSubmitToSA = async (page: FacebookPage) => {
   }
 };
 
-const fetchFacebookData = async (user: User) => {
+const fetchFacebookData = async (
+  user: User,
+  options: { fetchSinceDays: number },
+) => {
+  // fetch interval
+  const fetchPagesSince = new Date(
+    new Date().getTime() - 1000 * 60 * 60 * 24 * options.fetchSinceDays,
+  );
+
   const pages = await fetchFacebookPagesForUser(user.id);
   for (const page of pages) {
     console.log(`Fetching page: ${page.name}`);
@@ -95,7 +98,7 @@ const fetchFacebookData = async (user: User) => {
         });
         console.log(
           `Added post ${post.id} with id ${JSON.stringify(
-            response.identifiers[0].internalId,
+            response.identifiers[0].id,
           )}`,
         );
         postInDB = await FacebookPost.findOne(post.id);
@@ -132,7 +135,7 @@ const fetchFacebookData = async (user: User) => {
           });
           console.log(
             `Added comment ${comment.id} with id ${JSON.stringify(
-              response.identifiers[0].internalId,
+              response.identifiers[0].id,
             )}`,
           );
           commentInDB = await FacebookComment.findOne(comment.id);
@@ -170,7 +173,7 @@ const fetchFacebookData = async (user: User) => {
             });
             console.log(
               `Added reply ${comment.id} with id ${JSON.stringify(
-                response.identifiers[0].internalId,
+                response.identifiers[0].id,
               )}`,
             );
           }

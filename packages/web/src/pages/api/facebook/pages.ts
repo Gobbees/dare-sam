@@ -17,7 +17,7 @@ const createPage = async (
 
   try {
     await FacebookPage.insert({
-      id: page.pid,
+      id: page.id,
       name: page.name,
       picture: page.pictureUrl,
       pageOwner: userId,
@@ -25,6 +25,7 @@ const createPage = async (
     console.log('Done');
     return res.status(200).end();
   } catch (error) {
+    console.error(error.message);
     return res.status(500).json({ error: error.message });
   }
 };
@@ -39,7 +40,6 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
-
   if (req.method === 'POST') {
     return createPage(req, res, session);
   }

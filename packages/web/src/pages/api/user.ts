@@ -20,7 +20,7 @@ const getUser = async (
   const pages: FacebookPage[] = [];
   user.facebookPages?.forEach((page) =>
     pages.push({
-      pid: page.id,
+      id: page.id,
       pictureUrl: page.picture,
       name: page.name,
     }),

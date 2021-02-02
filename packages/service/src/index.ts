@@ -32,7 +32,9 @@ const service = async () => {
     }
     const users = await fetchAllUsers();
     for (const user of users) {
-      await fetchFacebookData(user);
+      await fetchFacebookData(user, {
+        fetchSinceDays: serviceConfig.fetchSinceDays,
+      });
     }
 
     await TypeOrmManager.maybeCloseConnection();

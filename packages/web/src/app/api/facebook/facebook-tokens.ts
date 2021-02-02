@@ -1,5 +1,5 @@
 import axios from 'axios';
-import firebase from '../../lib/firebase';
+import firebase from '../../../lib/firebase';
 import 'firebase/auth';
 
 /**

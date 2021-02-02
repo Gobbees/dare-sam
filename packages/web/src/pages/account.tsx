@@ -6,8 +6,8 @@ import { FacebookPage } from '../types/types';
 import {
   getFacebookLongLivedToken,
   getFacebookAccessToken,
-} from '../app/api/facebook-tokens';
-import getFacebookPagesForProfile from '../app/api/facebook-pages';
+} from '../app/api/facebook/facebook-tokens';
+import getFacebookPagesForProfile from '../app/api/facebook/facebook-pages';
 import PageSelector from '../components/account/PageSelector';
 import useUser from '../hooks/UseUser';
 

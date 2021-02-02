@@ -7,7 +7,7 @@
     "build:web": "lerna run build --scope={@crystal-ball/common,@crystal-ball/database,@crystal-ball/web}",
     "build:service": "lerna run build --scope={@crystal-ball/common,@crystal-ball/database,@crystal-ball/service}",
     "precommit": "lint-staged",
-    "postinstall": "husky install"
+    "postinstall": "if [[ ${NODE_ENV} != \"production\" ]]; then husky install; fi"
   },
   "workspaces": {
     "packages": [
