@@ -1,8 +1,8 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getSession, Session } from 'next-auth/client';
+import { Session } from 'next-auth/client';
 import { Session as NextSession, User } from '@crystal-ball/database';
-import typeOrmConnect from '../../app/utils/typeOrmConnect';
-import { User as ClientUser, FacebookPage } from '../../types/types';
+import { User as ClientUser, FacebookPage } from '../../types';
+import authenticatedRoute from '../../app/utils/apiRoutes';
 
 const getUser = async (
   req: NextApiRequest,
@@ -62,17 +62,7 @@ const updateUser = async (
   }
 };
 
-export default async (req: NextApiRequest, res: NextApiResponse) => {
-  const session = await getSession({ req });
-  if (!session) {
-    return res.status(401).end();
-  }
-  try {
-    await typeOrmConnect();
-  } catch (error) {
-    return res.status(500).json({ error: error.message });
-  }
-
+const user = (req: NextApiRequest, res: NextApiResponse, session: Session) => {
   if (req.method === 'GET') {
     return getUser(req, res, session);
   }
@@ -81,3 +71,6 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   }
   return res.status(404).end();
 };
+
+export default async (req: NextApiRequest, res: NextApiResponse) =>
+  authenticatedRoute(req, res, user);

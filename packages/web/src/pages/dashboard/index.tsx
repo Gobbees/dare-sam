@@ -1,10 +1,8 @@
-import { Flex, Spinner } from '@chakra-ui/react';
+import { Flex, Spinner, Text } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import * as React from 'react';
-import { useQuery } from 'react-query';
-import { FacebookPost } from '../../../../database/src';
-import fetchFacebookPostsForPage from '../../app/api/facebook/facebook-posts';
 import PostTable from '../../components/dashboard/PostTable';
+import RedirectingPage from '../../components/RedirectingPage';
 import useUser from '../../hooks/UseUser';
 
 const DashboardPage = () => {
@@ -16,33 +14,27 @@ const DashboardPage = () => {
       router.replace('/login');
     }
   }, [user, loading, router]);
-
-  const { data } = useQuery<FacebookPost[]>('facebook-posts', () =>
-    fetchFacebookPostsForPage(user?.facebookPages),
-  );
-
   if (loading) {
     return <Spinner></Spinner>;
   }
 
   if (!user) {
-    return <h2>Redirecting...</h2>;
+    return <RedirectingPage />;
   }
 
-  return (
-    <Flex flexDir="column" align="center" h="100%">
+  return user.facebookPages && user.facebookPages.length ? (
+    <Flex flexDir="column" align="center">
+      <Text fontWeight="extrabold" fontSize="5xl">
+        Posts
+      </Text>
       <Flex flexDir="column" maxW="7xl" align="center">
-        {data && (
-          <PostTable
-            posts={data.map((post) => ({
-              id: post.id,
-              message: post.message,
-              likeCount: post.likeCount,
-              url: `https://facebook.com/${post.id}`,
-            }))}
-          />
-        )}
+        <PostTable pages={user.facebookPages} />
       </Flex>
+    </Flex>
+  ) : (
+    <Flex flexDir="column" align="center">
+      Uh oh, you don't have any Facebook Pages. Link them through the account
+      page.
     </Flex>
   );
 };

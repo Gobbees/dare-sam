@@ -4,7 +4,7 @@ import * as React from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ChakraProvider } from '@chakra-ui/react';
 import { defaultUserValue, UserContext } from '../context/UserContext';
-import { User } from '../types/types';
+import { User } from '../types';
 
 const queryClient = new QueryClient();
 

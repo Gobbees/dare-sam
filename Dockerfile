@@ -7,6 +7,8 @@ COPY ./packages/service/package.json ./packages/service/
 COPY ./packages/database/package.json ./packages/database/
 COPY ./packages/common/package.json ./packages/common/
 
+ENV NODE_ENV production
+
 RUN yarn install --production
 
 COPY ./packages/service/dist ./packages/service/dist

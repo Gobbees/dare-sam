@@ -104,78 +104,74 @@ const fetchFacebookData = async (
         postInDB = await FacebookPost.findOne(post.id);
       }
 
-      if (!post.comments) {
-        break;
-      }
-
-      // updates post comments
-      for (const comment of post.comments) {
-        let commentInDB = await FacebookComment.findOne(comment.id);
-        if (commentInDB) {
-          const shouldRecomputeSentiment =
-            commentInDB.message !== comment.message;
-          await FacebookComment.update(commentInDB, {
-            // TODO add like count
-            message: comment.message,
-            analyzedStatus: shouldRecomputeSentiment
-              ? AnalyzedStatus.UNANALYZED
-              : AnalyzedStatus.ANALYZED,
-            overallSentiment: shouldRecomputeSentiment
-              ? undefined
-              : commentInDB.overallSentiment,
-            entitiesSentiment: shouldRecomputeSentiment
-              ? undefined
-              : commentInDB.entitiesSentiment,
-          });
-        } else {
-          const response = await FacebookComment.insert({
-            id: comment.id,
-            message: comment.message,
-            post: postInDB,
-          });
-          console.log(
-            `Added comment ${comment.id} with id ${JSON.stringify(
-              response.identifiers[0].id,
-            )}`,
-          );
-          commentInDB = await FacebookComment.findOne(comment.id);
-        }
-
-        if (!comment.replies) {
-          break;
-        }
-
-        // updates comment replies
-        for (const reply of comment.replies) {
-          const replyInDB = await FacebookComment.findOne(comment.id);
-          if (replyInDB) {
+      if (post.comments) {
+        // updates post comments
+        for (const comment of post.comments) {
+          let commentInDB = await FacebookComment.findOne(comment.id);
+          if (commentInDB) {
             const shouldRecomputeSentiment =
-              replyInDB.message !== reply.message;
-            await FacebookComment.update(replyInDB, {
+              commentInDB.message !== comment.message;
+            await FacebookComment.update(commentInDB, {
               // TODO add like count
-              message: reply.message,
+              message: comment.message,
               analyzedStatus: shouldRecomputeSentiment
                 ? AnalyzedStatus.UNANALYZED
                 : AnalyzedStatus.ANALYZED,
               overallSentiment: shouldRecomputeSentiment
                 ? undefined
-                : replyInDB.overallSentiment,
+                : commentInDB.overallSentiment,
               entitiesSentiment: shouldRecomputeSentiment
                 ? undefined
-                : replyInDB.entitiesSentiment,
+                : commentInDB.entitiesSentiment,
             });
           } else {
             const response = await FacebookComment.insert({
-              id: reply.id,
-              message: reply.message,
-              replyTo: commentInDB,
+              id: comment.id,
+              message: comment.message,
               post: postInDB,
             });
             console.log(
-              `Added reply ${comment.id} with id ${JSON.stringify(
+              `Added comment ${comment.id} with id ${JSON.stringify(
                 response.identifiers[0].id,
               )}`,
             );
+            commentInDB = await FacebookComment.findOne(comment.id);
+          }
+
+          if (comment.replies) {
+            // updates comment replies
+            for (const reply of comment.replies) {
+              const replyInDB = await FacebookComment.findOne(reply.id);
+              if (replyInDB) {
+                const shouldRecomputeSentiment =
+                  replyInDB.message !== reply.message;
+                await FacebookComment.update(replyInDB, {
+                  // TODO add like count
+                  message: reply.message,
+                  analyzedStatus: shouldRecomputeSentiment
+                    ? AnalyzedStatus.UNANALYZED
+                    : AnalyzedStatus.ANALYZED,
+                  overallSentiment: shouldRecomputeSentiment
+                    ? undefined
+                    : replyInDB.overallSentiment,
+                  entitiesSentiment: shouldRecomputeSentiment
+                    ? undefined
+                    : replyInDB.entitiesSentiment,
+                });
+              } else {
+                const response = await FacebookComment.insert({
+                  id: reply.id,
+                  message: reply.message,
+                  replyTo: commentInDB,
+                  post: postInDB,
+                });
+                console.log(
+                  `Added reply ${comment.id} with id ${JSON.stringify(
+                    response.identifiers[0].id,
+                  )}`,
+                );
+              }
+            }
           }
         }
       }

@@ -26,7 +26,6 @@ const useUser = (): UseUserResult => {
 
   React.useEffect(() => {
     if (session && !isSessionLoading && !user) {
-      console.log('fetching user');
       fetch('/api/user', { method: 'GET' })
         .then((response) => response.json())
         .then((data) => {
@@ -39,8 +38,13 @@ const useUser = (): UseUserResult => {
         .catch((error) =>
           setState({ isLoading: false, errorState: error as Error }),
         );
+    } else if (!session && !isSessionLoading) {
+      setState({
+        isLoading: false,
+        errorState: new Error('Missing Authentication'),
+      });
     }
-  }, [session, isSessionLoading, user, state, setUser, setState]);
+  }, [session, isSessionLoading, user, setUser, setState]);
 
   return {
     user,

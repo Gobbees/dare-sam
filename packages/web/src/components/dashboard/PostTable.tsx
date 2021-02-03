@@ -1,7 +1,9 @@
 import {
+  Button,
   Flex,
   Icon,
   Link,
+  Spinner,
   Table,
   Tbody,
   Td,
@@ -13,7 +15,11 @@ import {
 import * as React from 'react';
 import { IoChevronDown, IoChevronUp } from 'react-icons/io5';
 import { BiLike } from 'react-icons/bi';
+import { useQuery } from 'react-query';
 import { Column, useExpanded, useTable } from 'react-table';
+import CommentTable from './CommentTable';
+import { fetchFacebookPostsForPage } from '../../app/api/facebook';
+import { FacebookPage, FacebookPost } from '../../types';
 
 interface PostTableData {
   message?: string;
@@ -22,8 +28,94 @@ interface PostTableData {
   id: string;
 }
 interface PostTableProps {
-  posts: Array<PostTableData>;
+  pages: FacebookPage[];
 }
+
+const PostTable: React.FC<PostTableProps> = (props: PostTableProps) => {
+  const { data, status } = useQuery<FacebookPost[]>('facebook-posts', () =>
+    fetchFacebookPostsForPage(props.pages),
+  );
+  const posts = React.useMemo(
+    () =>
+      data?.map((post) => ({
+        message: post.message,
+        likeCount: post.likeCount,
+        url: `https://facebook.com/${post.id}`,
+        id: post.id,
+      })),
+    [data],
+  );
+  const { columns, tableData } = useTableData(posts || []);
+
+  const {
+    getTableProps,
+    headerGroups,
+    getTableBodyProps,
+    rows,
+    prepareRow,
+    toggleAllRowsExpanded,
+    visibleColumns,
+  }: any = useTable<PostTableData>(
+    {
+      columns,
+      data: tableData,
+    },
+    useExpanded,
+  );
+  // any because toggleAllRowsExpanded doesn't exist in the basic TableInstance.
+
+  if (status === 'loading') {
+    return <Spinner></Spinner>;
+  }
+  if (!data) {
+    return <>Uh oh, your page doesn't have any post yet</>;
+  }
+
+  return (
+    <>
+      <Button onClick={() => toggleAllRowsExpanded(false)}>
+        Close all comments
+      </Button>
+      <Table {...getTableProps()}>
+        <Thead>
+          {headerGroups.map((headerGroup: any) => (
+            <Tr {...headerGroup.getHeaderGroupProps()}>
+              {headerGroup.headers.map((column: any) => (
+                <Th {...column.getHeaderProps()}>{column.render('Header')}</Th>
+              ))}
+            </Tr>
+          ))}
+        </Thead>
+        <Tbody {...getTableBodyProps()}>
+          {rows.map((row: any) => {
+            prepareRow(row);
+            return (
+              <React.Fragment key={row.id}>
+                <Tr {...row.getRowProps()}>
+                  {row.cells.map((cell: any) => (
+                    <Td {...cell.getCellProps()}>{cell.render('Cell')}</Td>
+                  ))}
+                </Tr>
+                {row.isExpanded ? (
+                  <Tr>
+                    <Td colSpan={visibleColumns.length}>
+                      <Flex flexDir="column" align="center">
+                        <Text fontWeight="extrabold">Comments</Text>
+                        <Flex flexDir="column" align="center">
+                          <CommentTable postId={data[row.index].id} />
+                        </Flex>
+                      </Flex>
+                    </Td>
+                  </Tr>
+                ) : null}
+              </React.Fragment>
+            );
+          })}
+        </Tbody>
+      </Table>
+    </>
+  );
+};
 
 const useTableData = (posts: PostTableData[]) => {
   const columns = React.useMemo<Array<Column<PostTableData>>>(
@@ -73,7 +165,7 @@ const useTableData = (posts: PostTableData[]) => {
     ],
     [],
   );
-  const data = React.useMemo<Array<PostTableData>>(
+  const tableData = React.useMemo<Array<PostTableData>>(
     () =>
       posts.map((post) => ({
         id: post.id,
@@ -83,49 +175,7 @@ const useTableData = (posts: PostTableData[]) => {
       })),
     [posts],
   );
-  return { columns, data };
-};
-
-const PostTable: React.FC<PostTableProps> = (props: PostTableProps) => {
-  const { columns, data } = useTableData(props.posts);
-  const {
-    getTableProps,
-    headerGroups,
-    getTableBodyProps,
-    rows,
-    prepareRow,
-  } = useTable<PostTableData>(
-    {
-      columns,
-      data,
-    },
-    useExpanded,
-  );
-  return (
-    <Table {...getTableProps()}>
-      <Thead>
-        {headerGroups.map((headerGroup) => (
-          <Tr {...headerGroup.getHeaderGroupProps()}>
-            {headerGroup.headers.map((column) => (
-              <Th {...column.getHeaderProps()}>{column.render('Header')}</Th>
-            ))}
-          </Tr>
-        ))}
-      </Thead>
-      <Tbody {...getTableBodyProps()}>
-        {rows.map((row) => {
-          prepareRow(row);
-          return (
-            <Tr {...row.getRowProps()}>
-              {row.cells.map((cell) => (
-                <Td {...cell.getCellProps()}>{cell.render('Cell')}</Td>
-              ))}
-            </Tr>
-          );
-        })}
-      </Tbody>
-    </Table>
-  );
+  return { columns, tableData };
 };
 
 export default PostTable;

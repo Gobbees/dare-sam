@@ -2,14 +2,15 @@ import * as React from 'react';
 import { useRouter } from 'next/router';
 import { Box, Button, Spinner, Text } from '@chakra-ui/react';
 import { AiFillFacebook } from 'react-icons/ai';
-import { FacebookPage } from '../types/types';
+import { FacebookPage } from '../types';
 import {
   getFacebookLongLivedToken,
   getFacebookAccessToken,
 } from '../app/api/facebook/facebook-tokens';
-import getFacebookPagesForProfile from '../app/api/facebook/facebook-pages';
+import { getFacebookPagesForProfile } from '../app/api/facebook';
 import PageSelector from '../components/account/PageSelector';
 import useUser from '../hooks/UseUser';
+import RedirectingPage from '../components/RedirectingPage';
 
 const AccountPage = () => {
   const router = useRouter();
@@ -26,11 +27,16 @@ const AccountPage = () => {
     return <Spinner></Spinner>;
   }
 
-  return user ? (
+  if (!user) {
+    return <RedirectingPage />;
+  }
+
+  return (
     <Box maxW="6xl" p={60}>
       <pre>{JSON.stringify(user, null, 2)}</pre>
       <Text fontSize="xl">Your Facebook pages</Text>
       {user?.facebookPages && <PageSelector pages={user.facebookPages} />}
+      {/* TODO extract this in another component */}
       <Button
         leftIcon={<AiFillFacebook />}
         colorScheme="blue"
@@ -75,8 +81,6 @@ const AccountPage = () => {
         Connect your Facebook Account
       </Button>
     </Box>
-  ) : (
-    <h1>Redirecting</h1>
   );
 };
 
