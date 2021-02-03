@@ -17,7 +17,8 @@ import { BiLike } from 'react-icons/bi';
 import { useQuery } from 'react-query';
 import { Column, useTable } from 'react-table';
 import { fetchFacebookCommentsForPost } from '../../app/api/facebook';
-import { FacebookComment } from '../../types';
+import { FacebookComment, Sentiment } from '../../types';
+import SentimentEmoji from '../SentimentEmoji';
 
 interface CommentTableProps {
   postId: string;
@@ -27,6 +28,7 @@ interface CommentTableColumns {
   message?: string;
   url: string;
   likeCount: number;
+  overallSentiment?: Sentiment;
 }
 
 const CommentTable: React.FC<CommentTableProps> = (
@@ -132,6 +134,19 @@ const useTableData = (comments: FacebookComment[]) => {
           </Text>
         ),
       },
+      {
+        Header: 'Sentiment',
+        accessor: 'overallSentiment',
+        Cell: ({ value }) => (
+          <Flex align="center">
+            {value ? (
+              <SentimentEmoji sentiment={value} extraStyles={{ w: 6, h: 6 }} />
+            ) : (
+              <Text>No sentiment detected</Text>
+            )}
+          </Flex>
+        ),
+      },
     ],
     [],
   );
@@ -141,6 +156,7 @@ const useTableData = (comments: FacebookComment[]) => {
         message: comment.message,
         url: `https://facebook.com/${comment.id}`,
         likeCount: comment.likeCount,
+        overallSentiment: comment.sentiment,
       })),
     [comments],
   );

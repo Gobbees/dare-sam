@@ -1,6 +1,7 @@
 import {
   Button,
   Flex,
+  HStack,
   Icon,
   Link,
   Spinner,
@@ -74,9 +75,14 @@ const PostTable: React.FC<PostTableProps> = (props: PostTableProps) => {
 
   return (
     <>
-      <Button onClick={() => toggleAllRowsExpanded(false)}>
-        Close all comments
-      </Button>
+      <HStack spacing={4}>
+        <Button onClick={() => toggleAllRowsExpanded(false)}>
+          Close all comments tabs
+        </Button>
+        <Button onClick={() => toggleAllRowsExpanded(true)}>
+          Open all comments tabs
+        </Button>
+      </HStack>
       <Table {...getTableProps()}>
         <Thead>
           {headerGroups.map((headerGroup: any) => (

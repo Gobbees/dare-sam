@@ -1,5 +1,9 @@
-import { Sentiment } from '@crystal-ball/database';
-
+export enum Sentiment {
+  POSITIVE = 2,
+  NEUTRAL = 1,
+  MIXED = 0,
+  NEGATIVE = -1,
+}
 export interface FacebookComment {
   message?: string;
   likeCount: number;
