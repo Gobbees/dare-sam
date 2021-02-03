@@ -35,7 +35,9 @@ const SentimentEmoji: React.FC<SentimentEmojiProps> = (
       );
       break;
     case Sentiment.NEUTRAL:
-      emojiIcon = <Icon as={FaRegMeh} {...props.extraStyles} />;
+      emojiIcon = (
+        <Icon as={FaRegMeh} color="gray.500" {...props.extraStyles} />
+      );
       break;
   }
   return emojiIcon;
