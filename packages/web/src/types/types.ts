@@ -12,13 +12,15 @@ export interface FacebookComment {
 }
 
 export interface FacebookPost {
+  publishedDate: Date;
   message?: string;
-  likeCount: number;
+  likesCount: number;
+  sharesCount: number;
+  commentsCount: number;
   id: string;
   postSentiment?: Sentiment;
   // average of comments sentiment from -1 to 1
   overallSentiment?: number;
-  // TODO add shares and commentCount
 }
 
 export interface FacebookPage {

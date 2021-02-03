@@ -7,12 +7,13 @@ interface FacebookPostComment {
 }
 
 interface FacebookPost {
-  // TODO
   id: string;
   message?: string;
   picture?: string;
   likeCount: number;
-  // posts?fields=comments.since(2012-01-01T10:10:10),message
+  sharesCount: number;
+  publishedDate: Date;
+  commentCount: number;
   comments?: FacebookPostComment[];
 }
 

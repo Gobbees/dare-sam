@@ -13,9 +13,10 @@ import {
   Thead,
   Tr,
 } from '@chakra-ui/react';
+import { format } from 'date-fns';
 import * as React from 'react';
 import { AiFillFacebook } from 'react-icons/ai';
-import { BiLike } from 'react-icons/bi';
+import { BiComment, BiLike, BiShare } from 'react-icons/bi';
 import { IoChevronDown, IoChevronUp } from 'react-icons/io5';
 import { useQuery } from 'react-query';
 import { Column, useExpanded, useTable } from 'react-table';
@@ -23,31 +24,25 @@ import CommentTable from './CommentTable';
 import { fetchFacebookPostsForPage } from '../../app/api/facebook';
 import { FacebookPage, FacebookPost } from '../../types';
 
-interface PostTableData {
-  message?: string;
-  likeCount: number;
-  url: string;
-  id: string;
-}
 interface PostTableProps {
   pages: FacebookPage[];
+}
+
+interface PostTableColumns {
+  publishedDate: Date;
+  message?: string;
+  url: string;
+  likesCount: number;
+  sharesCount: number;
+  commentsCount: number;
 }
 
 const PostTable: React.FC<PostTableProps> = (props: PostTableProps) => {
   const { data, status } = useQuery<FacebookPost[]>('facebook-posts', () =>
     fetchFacebookPostsForPage(props.pages),
   );
-  const posts = React.useMemo(
-    () =>
-      data?.map((post) => ({
-        message: post.message,
-        likeCount: post.likeCount,
-        url: `https://facebook.com/${post.id}`,
-        id: post.id,
-      })),
-    [data],
-  );
-  const { columns, tableData } = useTableData(posts || []);
+
+  const { columns, tableData } = useTableData(data || []);
 
   const {
     getTableProps,
@@ -57,7 +52,7 @@ const PostTable: React.FC<PostTableProps> = (props: PostTableProps) => {
     prepareRow,
     toggleAllRowsExpanded,
     visibleColumns,
-  }: any = useTable<PostTableData>(
+  }: any = useTable(
     {
       columns,
       data: tableData,
@@ -124,20 +119,33 @@ const PostTable: React.FC<PostTableProps> = (props: PostTableProps) => {
   );
 };
 
-const useTableData = (posts: PostTableData[]) => {
-  const columns = React.useMemo<Array<Column<PostTableData>>>(
+const useTableData = (posts: FacebookPost[]) => {
+  const columns = React.useMemo<Array<Column<PostTableColumns>>>(
     () => [
       {
         id: 'rowExpander',
         Cell: ({ row }: any) => (
-          <Flex
-            align="center"
-            justify="center"
-            w={8}
-            h={8}
-            {...row.getToggleRowExpandedProps()}
-          >
-            <Icon as={row.isExpanded ? IoChevronUp : IoChevronDown} />
+          <>
+            {row.values.commentsCount !== 0 && (
+              <Flex
+                align="center"
+                justify="center"
+                w={8}
+                h={8}
+                {...row.getToggleRowExpandedProps()}
+              >
+                <Icon as={row.isExpanded ? IoChevronUp : IoChevronDown} />
+              </Flex>
+            )}
+          </>
+        ),
+      },
+      {
+        Header: 'Published Date',
+        accessor: 'publishedDate',
+        Cell: ({ value }) => (
+          <Flex align="center">
+            <Text>{format(new Date(value), 'PPP')}</Text>
           </Flex>
         ),
       },
@@ -163,23 +171,43 @@ const useTableData = (posts: PostTableData[]) => {
       },
       {
         Header: 'Like Count',
-        accessor: 'likeCount',
+        accessor: 'likesCount',
         Cell: ({ value }) => (
           <Text display="inline-block">
             <Icon as={BiLike} w={5} h={5} /> {value}
           </Text>
         ),
       },
+      {
+        Header: 'Shares Count',
+        accessor: 'sharesCount',
+        Cell: ({ value }) => (
+          <Text display="inline-block">
+            <Icon as={BiShare} w={5} h={5} /> {value}
+          </Text>
+        ),
+      },
+      {
+        Header: 'Comments Count',
+        accessor: 'commentsCount',
+        Cell: ({ value }) => (
+          <Text display="inline-block">
+            <Icon as={BiComment} w={5} h={5} /> {value}
+          </Text>
+        ),
+      },
     ],
     [],
   );
-  const tableData = React.useMemo<Array<PostTableData>>(
+  const tableData = React.useMemo<Array<PostTableColumns>>(
     () =>
       posts.map((post) => ({
-        id: post.id,
+        publishedDate: post.publishedDate,
         message: post.message,
         url: `https://facebook.com/${post.id}`,
-        likeCount: post.likeCount,
+        likesCount: post.likesCount,
+        sharesCount: post.sharesCount,
+        commentsCount: post.commentsCount,
       })),
     [posts],
   );

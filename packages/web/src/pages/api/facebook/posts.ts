@@ -1,8 +1,16 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Session } from 'next-auth/client';
-import { FacebookPage, Session as NextSession } from '@crystal-ball/database';
+import {
+  FacebookPage,
+  FacebookPost,
+  Session as NextSession,
+} from '@crystal-ball/database';
 import authenticatedRoute from '../../../app/utils/apiRoutes';
+import { FacebookPost as ClientFacebookPost } from '../../../types';
 
+/**
+ * @returns an array of FacebookPost ordered by published date
+ */
 const posts = async (
   req: NextApiRequest,
   res: NextApiResponse,
@@ -19,13 +27,29 @@ const posts = async (
 
   const facebookPage = await FacebookPage.findOne({
     where: { id: pageId, pageOwner: userId },
-    relations: ['posts'],
   });
   if (!facebookPage) {
     return res.status(404).end();
   }
 
-  return res.status(200).json(JSON.stringify(facebookPage.posts));
+  const dbPosts = await FacebookPost.find({
+    where: { page: facebookPage.id },
+    order: { publishedDate: 'DESC' },
+  });
+
+  const facebookPosts: ClientFacebookPost[] = [];
+  dbPosts.forEach((post) =>
+    facebookPosts.push({
+      id: post.id,
+      message: post.message,
+      publishedDate: post.publishedDate,
+      postSentiment: post.postSentiment,
+      likesCount: post.likeCount,
+      sharesCount: post.sharesCount,
+      commentsCount: post.commentsCount,
+    }),
+  );
+  return res.status(200).json(JSON.stringify(facebookPosts));
 };
 
 export default async (req: NextApiRequest, res: NextApiResponse) =>

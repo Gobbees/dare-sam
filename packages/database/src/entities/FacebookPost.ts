@@ -37,6 +37,24 @@ export default class FacebookPost extends BaseEntityWithMetadata {
   likeCount!: number;
 
   @Column({
+    name: 'shares_count',
+    default: 0,
+  })
+  sharesCount!: number;
+
+  @Column({
+    name: 'comments_count',
+    default: 0,
+  })
+  commentsCount!: number;
+
+  @Column({
+    name: 'published_date',
+    default: new Date('1970-01-01T00:00:00.000Z'),
+  })
+  publishedDate!: Date;
+
+  @Column({
     type: 'enum',
     enum: Sentiment,
     name: 'post_sentiment',

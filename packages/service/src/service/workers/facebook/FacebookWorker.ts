@@ -79,6 +79,9 @@ const fetchFacebookData = async (
         const shouldRecomputeSentiment = postInDB.message !== post.message;
         await FacebookPost.update(postInDB.id, {
           likeCount: post.likeCount,
+          commentsCount: post.commentCount,
+          sharesCount: post.sharesCount,
+          publishedDate: post.publishedDate,
           message: post.message,
           analyzedStatus: shouldRecomputeSentiment
             ? AnalyzedStatus.UNANALYZED
@@ -91,8 +94,11 @@ const fetchFacebookData = async (
       } else {
         const response = await FacebookPost.insert({
           id: post.id,
-          pictureUrl: post.picture,
+          publishedDate: post.publishedDate,
           message: post.message,
+          pictureUrl: post.picture,
+          commentsCount: post.commentCount,
+          sharesCount: post.sharesCount,
           likeCount: post.likeCount,
           page,
         });
