@@ -27,6 +27,12 @@ export default class FacebookComment extends BaseEntityWithMetadata {
   message!: string;
 
   @Column({
+    name: 'like_count',
+    default: 0,
+  })
+  likeCount!: number;
+
+  @Column({
     name: 'entities_sentiment',
     type: 'json',
     nullable: true,

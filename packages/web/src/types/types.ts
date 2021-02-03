@@ -2,7 +2,7 @@ import { Sentiment } from '@crystal-ball/database';
 
 export interface FacebookComment {
   message?: string;
-  // TODO add likeCount: number;
+  likeCount: number;
   id: string;
   sentiment?: Sentiment;
 }

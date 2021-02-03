@@ -58,6 +58,10 @@ export class TypeOrmManager {
     }
   }
 
+  public static getConnection() {
+    return this.connection;
+  }
+
   public static isConnected() {
     return this.connection ? this.connection.isConnected : false;
   }

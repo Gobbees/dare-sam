@@ -1,4 +1,6 @@
 import {
+  Flex,
+  Icon,
   Link,
   Spinner,
   Table,
@@ -10,6 +12,7 @@ import {
   Tr,
 } from '@chakra-ui/react';
 import React from 'react';
+import { AiFillFacebook } from 'react-icons/ai';
 import { BiLike } from 'react-icons/bi';
 import { useQuery } from 'react-query';
 import { Column, useTable } from 'react-table';
@@ -23,6 +26,7 @@ interface CommentTableProps {
 interface CommentTableColumns {
   message?: string;
   url: string;
+  likeCount: number;
 }
 
 const CommentTable: React.FC<CommentTableProps> = (
@@ -113,20 +117,21 @@ const useTableData = (comments: FacebookComment[]) => {
         accessor: 'url',
         Cell: ({ value }) => (
           <Link href={value}>
-            <BiLike />
+            <Flex flexDir="row" align="center" maxW={64}>
+              View on <Icon as={AiFillFacebook} w={8} h={7} color="blue.600" />
+            </Flex>
           </Link>
         ),
       },
-      // {
-      //   Header: 'Like Count',
-      //   accessor: 'likeCount',
-      //   Cell: ({ value }) => (
-      //     <Text display="inline-block">
-      //       <BiLike />
-      //       {value}
-      //     </Text>
-      //   ),
-      // },
+      {
+        Header: 'Like Count',
+        accessor: 'likeCount',
+        Cell: ({ value }) => (
+          <Text display="inline-block">
+            <Icon as={BiLike} w={5} h={5} /> {value}
+          </Text>
+        ),
+      },
     ],
     [],
   );
@@ -135,6 +140,7 @@ const useTableData = (comments: FacebookComment[]) => {
       comments.map((comment) => ({
         message: comment.message,
         url: `https://facebook.com/${comment.id}`,
+        likeCount: comment.likeCount,
       })),
     [comments],
   );

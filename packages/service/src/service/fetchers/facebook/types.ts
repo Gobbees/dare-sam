@@ -1,7 +1,6 @@
 interface FacebookPostComment {
-  // TODO
   id: string;
-  likeCount?: number;
+  likeCount: number;
   message: string;
   replies?: FacebookPostComment[];
   replyTo?: string;

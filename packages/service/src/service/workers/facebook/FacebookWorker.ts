@@ -77,7 +77,7 @@ const fetchFacebookData = async (
       let postInDB = await FacebookPost.findOne(post.id);
       if (postInDB) {
         const shouldRecomputeSentiment = postInDB.message !== post.message;
-        await FacebookPost.update(postInDB, {
+        await FacebookPost.update(postInDB.id, {
           likeCount: post.likeCount,
           message: post.message,
           analyzedStatus: shouldRecomputeSentiment
@@ -111,8 +111,8 @@ const fetchFacebookData = async (
           if (commentInDB) {
             const shouldRecomputeSentiment =
               commentInDB.message !== comment.message;
-            await FacebookComment.update(commentInDB, {
-              // TODO add like count
+            await FacebookComment.update(commentInDB.id, {
+              likeCount: comment.likeCount,
               message: comment.message,
               analyzedStatus: shouldRecomputeSentiment
                 ? AnalyzedStatus.UNANALYZED
@@ -128,6 +128,7 @@ const fetchFacebookData = async (
             const response = await FacebookComment.insert({
               id: comment.id,
               message: comment.message,
+              likeCount: comment.likeCount,
               post: postInDB,
             });
             console.log(
@@ -145,7 +146,7 @@ const fetchFacebookData = async (
               if (replyInDB) {
                 const shouldRecomputeSentiment =
                   replyInDB.message !== reply.message;
-                await FacebookComment.update(replyInDB, {
+                await FacebookComment.update(replyInDB.id, {
                   // TODO add like count
                   message: reply.message,
                   analyzedStatus: shouldRecomputeSentiment

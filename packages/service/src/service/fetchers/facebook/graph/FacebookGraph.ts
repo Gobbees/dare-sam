@@ -24,7 +24,7 @@ const fetchRepliesForComment = async (
     for (const reply of response.data) {
       replies.push({
         id: reply.id,
-        likeCount: reply.like_count,
+        likeCount: reply.likes.summary.total_count,
         message: reply.message,
         replyTo: commentId,
       });
@@ -60,7 +60,7 @@ const fetchComments = async (comments: any, withReplies: boolean) => {
           : undefined;
       result.push({
         id: comment.id,
-        likeCount: comment.like_count,
+        likeCount: comment.likes.summary.total_count,
         message: comment.message,
         replies,
       });
@@ -135,9 +135,9 @@ export const fetchFacebookPagePosts = async (options: {
   }/posts?limit=${MAX_LIMIT}&since=${options.fromDate.toISOString()}&fields=id,message,picture,likes.summary(true)`;
   if (options.withComments) {
     url = url.concat(
-      `,comments.order(reverse_chronological){id,message${
+      `,comments.order(reverse_chronological){id,message,likes.summary(true)${
         options.withCommentsReplies
-          ? ',comments.order(reverse_chronological){id,message}'
+          ? ',comments.order(reverse_chronological){id,message,likes.summary(true)}'
           : ''
       }}`,
     );

@@ -63,6 +63,7 @@ const comments = async (
       id: comment.id,
       message: comment.message,
       sentiment: comment.overallSentiment,
+      likeCount: comment.likeCount,
     }),
   );
   return res.status(200).json(JSON.stringify(facebookComments));

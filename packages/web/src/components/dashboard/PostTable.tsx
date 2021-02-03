@@ -13,8 +13,9 @@ import {
   Tr,
 } from '@chakra-ui/react';
 import * as React from 'react';
-import { IoChevronDown, IoChevronUp } from 'react-icons/io5';
+import { AiFillFacebook } from 'react-icons/ai';
 import { BiLike } from 'react-icons/bi';
+import { IoChevronDown, IoChevronUp } from 'react-icons/io5';
 import { useQuery } from 'react-query';
 import { Column, useExpanded, useTable } from 'react-table';
 import CommentTable from './CommentTable';
@@ -148,7 +149,9 @@ const useTableData = (posts: PostTableData[]) => {
         accessor: 'url',
         Cell: ({ value }) => (
           <Link href={value}>
-            <BiLike />
+            <Flex flexDir="row" align="center" maxW={64}>
+              View on <Icon as={AiFillFacebook} w={8} h={7} color="blue.600" />
+            </Flex>
           </Link>
         ),
       },
@@ -157,8 +160,7 @@ const useTableData = (posts: PostTableData[]) => {
         accessor: 'likeCount',
         Cell: ({ value }) => (
           <Text display="inline-block">
-            <BiLike />
-            {value}
+            <Icon as={BiLike} w={5} h={5} /> {value}
           </Text>
         ),
       },
