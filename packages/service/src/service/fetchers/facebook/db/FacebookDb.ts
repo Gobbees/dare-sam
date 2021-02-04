@@ -1,20 +1,31 @@
 import {
-  AnalyzedStatus,
   FacebookComment,
+  FacebookPage,
   FacebookPost,
 } from '@crystal-ball/database';
 
-export const fetchUnanalyzedPosts = async (pageId: string) => {
-  const posts = await FacebookPost.find({
-    where: {
-      page: { pageId },
-      analyzedStatus: AnalyzedStatus.UNANALYZED,
-    },
+export const fetchUnanalyzedPostsByPageAndPublishedDate = async (
+  page: FacebookPage,
+  publishedDate: Date,
+) =>
+  FacebookPost.findPostsByPageAndPublishedDate(page, publishedDate, {
+    unanalyzedOnly: true,
+    nonEmpty: true,
   });
-  return posts;
-};
 
-export const fetchUnanalyzedComments = async (post: FacebookPost) => {
-  const comments = await FacebookComment.findUnanalyzedByPost(post);
-  return comments;
-};
+export const fetchPostsByPageAndPublishedDate = async (
+  page: FacebookPage,
+  publishedDate: Date,
+) => FacebookPost.findPostsByPageAndPublishedDate(page, publishedDate);
+
+export const fetchUnanalyzedComments = async (post: FacebookPost) =>
+  FacebookComment.findCommentsByPost(post, {
+    unanalyzedOnly: true,
+    nonEmpty: true,
+  });
+
+export const fetchUnanalyzedReplies = async (post: FacebookPost) =>
+  FacebookComment.findRepliesByPost(post, {
+    unanalyzedOnly: true,
+    nonEmpty: true,
+  });

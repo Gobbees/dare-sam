@@ -2,6 +2,8 @@ interface FacebookPostComment {
   id: string;
   likeCount: number;
   message: string;
+  publishedDate: Date;
+  repliesCount: number;
   replies?: FacebookPostComment[];
   replyTo?: string;
 }

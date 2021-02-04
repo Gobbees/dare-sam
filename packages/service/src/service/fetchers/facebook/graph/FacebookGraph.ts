@@ -26,6 +26,8 @@ const fetchRepliesForComment = async (
         id: reply.id,
         likeCount: reply.likes.summary.total_count,
         message: reply.message,
+        publishedDate: reply.created_time,
+        repliesCount: 0, // a reply cannot have replies
         replyTo: commentId,
       });
     }
@@ -62,6 +64,8 @@ const fetchComments = async (comments: any, withReplies: boolean) => {
         id: comment.id,
         likeCount: comment.likes.summary.total_count,
         message: comment.message,
+        publishedDate: comment.created_time,
+        repliesCount: comment.comments.summary.total_count,
         replies,
       });
     }
@@ -135,9 +139,9 @@ export const fetchFacebookPagePosts = async (options: {
   }/posts?limit=${MAX_LIMIT}&since=${options.fromDate.toISOString()}&fields=id,created_time,message,picture,likes.summary(true),shares,comments.summary(true)`;
   if (options.withComments) {
     url = url.concat(
-      `.order(reverse_chronological){id,message,likes.summary(true)${
+      `.order(reverse_chronological){id,message,created_time,likes.summary(true)${
         options.withCommentsReplies
-          ? ',comments.summary(true).order(reverse_chronological){id,message,likes.summary(true)}'
+          ? ',comments.summary(true).order(reverse_chronological){id,message,created_time,likes.summary(true)}'
           : ''
       }}`,
     );

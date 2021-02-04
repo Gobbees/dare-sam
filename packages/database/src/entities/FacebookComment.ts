@@ -11,6 +11,7 @@ import {
 import BaseEntityWithMetadata from '../baseEntity';
 import FacebookPost from './FacebookPost';
 import { AnalyzedStatus, EntitySentiment, Sentiment } from '../commonValues';
+import { FindOptions } from './common/common';
 
 @Entity('facebook_comments')
 @Index('comment_id', ['id'], { unique: true })
@@ -25,6 +26,12 @@ export default class FacebookComment extends BaseEntityWithMetadata {
     nullable: true,
   })
   message!: string;
+
+  @Column({
+    name: 'published_date',
+    default: new Date('1970-01-01T00:00:00.000Z'),
+  })
+  publishedDate!: Date;
 
   @Column({
     name: 'like_count',
@@ -55,6 +62,12 @@ export default class FacebookComment extends BaseEntityWithMetadata {
   })
   analyzedStatus!: AnalyzedStatus;
 
+  @Column({
+    name: 'replies_count',
+    default: 0,
+  })
+  repliesCount!: number;
+
   @ManyToOne(() => FacebookPost, (post) => post.comments)
   post!: FacebookPost;
 
@@ -66,14 +79,33 @@ export default class FacebookComment extends BaseEntityWithMetadata {
 
   // Queries
 
-  static findUnanalyzedByPost = async (post: FacebookPost) => {
-    const result = await FacebookComment.find({
+  static findCommentsByPost = async (
+    post: FacebookPost,
+    options?: FindOptions,
+  ) =>
+    FacebookComment.find({
       where: {
         post,
-        analyzedStatus: AnalyzedStatus.UNANALYZED,
-        message: Not(IsNull()),
+        replyTo: IsNull(),
+        analyzedStatus: options?.unanalyzedOnly
+          ? AnalyzedStatus.UNANALYZED
+          : undefined,
+        message: options?.nonEmpty ? Not(IsNull()) : undefined,
       },
     });
-    return result;
-  };
+
+  static findRepliesByPost = async (
+    post: FacebookPost,
+    options?: FindOptions,
+  ) =>
+    FacebookComment.find({
+      where: {
+        post,
+        replyTo: Not(IsNull()),
+        analyzedStatus: options?.unanalyzedOnly
+          ? AnalyzedStatus.UNANALYZED
+          : undefined,
+        message: options?.nonEmpty ? Not(IsNull()) : undefined,
+      },
+    });
 }

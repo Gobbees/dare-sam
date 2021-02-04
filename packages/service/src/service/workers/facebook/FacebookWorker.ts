@@ -4,51 +4,25 @@ import {
   FacebookComment,
   FacebookPage,
   FacebookPost,
-  Sentiment,
   User,
 } from '@crystal-ball/database';
-import { fetchUnanalyzedComments } from '../../fetchers/facebook/db';
+import {
+  fetchPostsByPageAndPublishedDate,
+  fetchUnanalyzedComments,
+  fetchUnanalyzedPostsByPageAndPublishedDate,
+  fetchUnanalyzedReplies,
+} from '../../fetchers/facebook/db';
 import { fetchFacebookPagePosts } from '../../fetchers/facebook/graph';
 import submitToSentimentAnalysisService, {
   SentimentAnalysisServiceRequest,
 } from '../sentiment-analysis';
-
-const fetchUnanalyzedAndSubmitToSA = async (page: FacebookPage) => {
-  //   const unanalyzedPosts = fetchUnanalyzedPosts(pageId);
-  const unanalyzedComments: Array<FacebookComment> = [];
-  const pagePosts = await FacebookPost.find({
-    where: { page },
-  });
-
-  for (const post of pagePosts) {
-    const unanalyzedCommentsForPost = await fetchUnanalyzedComments(post);
-    unanalyzedComments.push(...unanalyzedCommentsForPost);
-  }
-  const sentimentAnalysisServiceInput: SentimentAnalysisServiceRequest = {
-    sentences: unanalyzedComments.map((comment) => ({
-      id: comment.id,
-      message: comment.message,
-    })),
-    languageCode: 'it',
-  };
-  const sentimentAnalysisResult = await submitToSentimentAnalysisService(
-    sentimentAnalysisServiceInput,
-  );
-
-  for (const comment of sentimentAnalysisResult) {
-    await FacebookComment.update(comment.id, {
-      analyzedStatus: AnalyzedStatus.ANALYZED,
-      overallSentiment: comment.sentiment || Sentiment.MIXED,
-    });
-  }
-};
 
 const fetchFacebookData = async (
   user: User,
   options: { fetchSinceDays: number },
 ) => {
   // fetch interval
-  const fetchPagesSince = new Date(
+  const fetchPageSince = new Date(
     new Date().getTime() - 1000 * 60 * 60 * 24 * options.fetchSinceDays,
   );
 
@@ -62,7 +36,7 @@ const fetchFacebookData = async (
   const posts = await fetchFacebookPagePosts({
     pageId: page.id,
     token: user.facebookAccessToken,
-    fromDate: fetchPagesSince,
+    fromDate: fetchPageSince,
     withComments: true,
     withCommentsReplies: true,
   });
@@ -120,6 +94,7 @@ const fetchFacebookData = async (
           await FacebookComment.update(commentInDB.id, {
             likeCount: comment.likeCount,
             message: comment.message,
+            repliesCount: comment.repliesCount,
             analyzedStatus: shouldRecomputeSentiment
               ? AnalyzedStatus.UNANALYZED
               : AnalyzedStatus.ANALYZED,
@@ -130,10 +105,12 @@ const fetchFacebookData = async (
               ? undefined
               : commentInDB.entitiesSentiment,
           });
-        } else {
+        } else if (comment.message) {
           const response = await FacebookComment.insert({
             id: comment.id,
             message: comment.message,
+            publishedDate: comment.publishedDate,
+            repliesCount: comment.repliesCount,
             likeCount: comment.likeCount,
             post: postInDB,
           });
@@ -143,6 +120,9 @@ const fetchFacebookData = async (
             )}`,
           );
           commentInDB = await FacebookComment.findOne(comment.id);
+        } else {
+          // eslint-disable-next-line no-continue
+          continue;
         }
 
         if (comment.replies) {
@@ -153,7 +133,7 @@ const fetchFacebookData = async (
               const shouldRecomputeSentiment =
                 replyInDB.message !== reply.message;
               await FacebookComment.update(replyInDB.id, {
-                // TODO add like count
+                likeCount: reply.likeCount,
                 message: reply.message,
                 analyzedStatus: shouldRecomputeSentiment
                   ? AnalyzedStatus.UNANALYZED
@@ -165,10 +145,12 @@ const fetchFacebookData = async (
                   ? undefined
                   : replyInDB.entitiesSentiment,
               });
-            } else {
+            } else if (reply.message) {
               const response = await FacebookComment.insert({
                 id: reply.id,
                 message: reply.message,
+                publishedDate: reply.publishedDate,
+                likeCount: reply.likeCount,
                 replyTo: commentInDB,
                 post: postInDB,
               });
@@ -183,7 +165,65 @@ const fetchFacebookData = async (
       }
     }
   }
-  await fetchUnanalyzedAndSubmitToSA(page);
+  await fetchUnanalyzedAndSubmitToSA(page, fetchPageSince);
+};
+
+const fetchUnanalyzedAndSubmitToSA = async (
+  page: FacebookPage,
+  fetchPageSince: Date,
+) => {
+  // TODO find a better way to do this
+  // posts
+  const unanalyzedPosts = await fetchUnanalyzedPostsByPageAndPublishedDate(
+    page,
+    fetchPageSince,
+  );
+  let sentimentAnalysisServiceInput: SentimentAnalysisServiceRequest = {
+    sentences: unanalyzedPosts.map((post) => ({
+      id: post.id,
+      message: post.message,
+    })),
+    languageCode: 'it', // TODO change this to be a user setting
+  };
+  let sentimentAnalysisResult = await submitToSentimentAnalysisService(
+    sentimentAnalysisServiceInput,
+  );
+  for (const comment of sentimentAnalysisResult) {
+    await FacebookPost.update(comment.id, {
+      analyzedStatus: AnalyzedStatus.ANALYZED,
+      postSentiment: comment.sentiment,
+    });
+  }
+
+  // comments + replies
+  const unanalyzedComments: Array<FacebookComment> = [];
+  const pagePosts = await fetchPostsByPageAndPublishedDate(
+    page,
+    fetchPageSince,
+  );
+
+  for (const post of pagePosts) {
+    const unanalyzedCommentsForPost = await fetchUnanalyzedComments(post);
+    unanalyzedComments.push(...unanalyzedCommentsForPost);
+    const unanalyzedRepliesForPost = await fetchUnanalyzedReplies(post);
+    unanalyzedComments.push(...unanalyzedRepliesForPost);
+  }
+  sentimentAnalysisServiceInput = {
+    sentences: unanalyzedComments.map((comment) => ({
+      id: comment.id,
+      message: comment.message,
+    })),
+    languageCode: 'it', // TODO change this to be a user setting
+  };
+  sentimentAnalysisResult = await submitToSentimentAnalysisService(
+    sentimentAnalysisServiceInput,
+  );
+  for (const comment of sentimentAnalysisResult) {
+    await FacebookComment.update(comment.id, {
+      analyzedStatus: AnalyzedStatus.ANALYZED,
+      overallSentiment: comment.sentiment,
+    });
+  }
 };
 
 export default fetchFacebookData;
