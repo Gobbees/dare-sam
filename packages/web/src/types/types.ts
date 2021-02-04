@@ -25,15 +25,13 @@ export interface FacebookPost {
 
 export interface FacebookPage {
   id: string;
-  pageAccessToken?: string;
   name: string;
-  pictureUrl: string;
+  picture: string;
 }
 
 export interface User {
   name?: string;
   email?: string;
   image?: string;
-  facebookAccessToken?: string;
-  facebookPages?: FacebookPage[];
+  facebookPage?: FacebookPage;
 }

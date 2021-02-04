@@ -19,10 +19,9 @@ const createPage = async (
     await FacebookPage.insert({
       id: page.id,
       name: page.name,
-      picture: page.pictureUrl,
-      pageOwner: userId,
+      picture: page.picture,
+      owner: () => userId,
     });
-    console.log('Done');
     return res.status(200).end();
   } catch (error) {
     console.error(error.message);

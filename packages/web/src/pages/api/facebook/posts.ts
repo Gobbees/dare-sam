@@ -26,7 +26,7 @@ const posts = async (
   }
 
   const facebookPage = await FacebookPage.findOne({
-    where: { id: pageId, pageOwner: userId },
+    where: { id: pageId, owner: userId },
   });
   if (!facebookPage) {
     return res.status(404).end();

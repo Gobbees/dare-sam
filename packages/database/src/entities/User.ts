@@ -2,8 +2,8 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  OneToMany,
   Index,
+  OneToOne,
 } from 'typeorm';
 import BaseEntityWithMetadata from '../baseEntity';
 import FacebookPage from './FacebookPage';
@@ -42,6 +42,10 @@ export default class User extends BaseEntityWithMetadata {
   })
   isFacebookAccessTokenLLT!: boolean;
 
-  @OneToMany(() => FacebookPage, (facebookPage) => facebookPage.pageOwner)
-  facebookPages!: FacebookPage[] | undefined;
+  @OneToOne(() => FacebookPage, (facebookPage) => facebookPage.owner)
+  facebookPage!: FacebookPage | undefined;
+
+  // instagramProfile!: InstagramProfile | undefined;
+
+  // twitterAccount!: TwitterAccount | undefined;
 }

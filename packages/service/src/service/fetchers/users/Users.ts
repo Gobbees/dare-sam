@@ -1,7 +1,7 @@
 import { User } from '@crystal-ball/database';
 
 export const fetchAllUsers = async () => {
-  const users = await User.find();
+  const users = await User.find({ relations: ['facebookPage'] });
   return users;
 };
 

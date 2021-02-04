@@ -14,21 +14,17 @@ export const getFacebookPagesForProfile = async (authToken: string) => {
   response.data.forEach((page: any) =>
     pages.push({
       id: page.id,
-      pageAccessToken: page.access_token,
       name: page.name,
-      pictureUrl: page.picture.data.url,
+      picture: page.picture.data.url,
     }),
   );
   return pages;
 };
 
 export const fetchFacebookPostsForPage = async (
-  pages: FacebookPage[],
+  page: FacebookPage,
 ): Promise<FacebookPost[]> => {
-  if (!pages) {
-    return Promise.reject(new Error('Missing pages'));
-  }
-  const response = await fetch(`/api/facebook/posts?pageId=${pages[0].id}`);
+  const response = await fetch(`/api/facebook/posts?pageId=${page.id}`);
   const data = await response.json();
   return data;
 };

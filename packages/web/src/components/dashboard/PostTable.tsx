@@ -25,7 +25,7 @@ import { fetchFacebookPostsForPage } from '../../app/api/facebook';
 import { FacebookPage, FacebookPost } from '../../types';
 
 interface PostTableProps {
-  pages: FacebookPage[];
+  page: FacebookPage;
 }
 
 interface PostTableColumns {
@@ -39,7 +39,7 @@ interface PostTableColumns {
 
 const PostTable: React.FC<PostTableProps> = (props: PostTableProps) => {
   const { data, status } = useQuery<FacebookPost[]>('facebook-posts', () =>
-    fetchFacebookPostsForPage(props.pages),
+    fetchFacebookPostsForPage(props.page),
   );
 
   const { columns, tableData } = useTableData(data || []);
@@ -153,9 +153,11 @@ const useTableData = (posts: FacebookPost[]) => {
         Header: 'Message',
         accessor: 'message',
         Cell: ({ value }) => (
-          <Text isTruncated maxW="2xl">
-            {value}
-          </Text>
+          <Flex w={64}>
+            <Text isTruncated maxW="2xl">
+              {value}
+            </Text>
+          </Flex>
         ),
       },
       {

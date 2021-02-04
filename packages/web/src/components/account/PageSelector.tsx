@@ -30,7 +30,7 @@ const PageSelector: React.FC<PageSelectorProps> = (
                   <Flex flexDir="row" alignItems="center">
                     <Checkbox {...field} isChecked={field.value} />
                     <Text>{page.name}</Text>
-                    <Image src={page.pictureUrl} borderRadius="full" />
+                    <Image src={page.picture} borderRadius="full" />
                   </Flex>
                 )}
               </Field>

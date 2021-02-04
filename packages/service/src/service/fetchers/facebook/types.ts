@@ -17,22 +17,11 @@ interface FacebookPost {
   comments?: FacebookPostComment[];
 }
 
-/**
- * Response of the /{page-id}/posts API.
- */
-interface FacebookPostsResponse {
-  // TODO
-}
 interface FacebookPage {
-  pid: string;
+  id: string;
   pageAccessToken: string;
   name: string;
   pictureUrl: string;
 }
 
-export {
-  FacebookPage,
-  FacebookPostsResponse,
-  FacebookPost,
-  FacebookPostComment,
-};
+export { FacebookPage, FacebookPost, FacebookPostComment };

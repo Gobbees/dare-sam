@@ -17,11 +17,12 @@ const verifyUserAccess = async (
     where: { accessToken: session.accessToken },
     select: ['userId'],
   });
-  const user = await User.findOne(userId, { relations: ['facebookPages'] });
+  const user = await User.findOne(userId, { relations: ['facebookPage'] });
   if (
     !(
       user &&
-      user.facebookPages?.map((page) => page.id).includes(facebookPost.page.id)
+      user.facebookPage &&
+      user.facebookPage.id === facebookPost.page.id
     )
   ) {
     return Promise.reject(new Error('Missing user access'));

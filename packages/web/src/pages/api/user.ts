@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Session } from 'next-auth/client';
 import { Session as NextSession, User } from '@crystal-ball/database';
-import { User as ClientUser, FacebookPage } from '../../types';
+import { FacebookPage, User as ClientUser } from '../../types';
 import authenticatedRoute from '../../app/utils/apiRoutes';
 
 const getUser = async (
@@ -15,22 +15,18 @@ const getUser = async (
   });
   const user = await User.findOneOrFail({
     where: { id: userId },
-    relations: ['facebookPages'],
+    relations: ['facebookPage'],
   });
-  const pages: FacebookPage[] = [];
-  user.facebookPages?.forEach((page) =>
-    pages.push({
-      id: page.id,
-      pictureUrl: page.picture,
-      name: page.name,
-    }),
-  );
+  const facebookPage: FacebookPage | undefined = user.facebookPage && {
+    id: user.facebookPage.id,
+    name: user.facebookPage.name,
+    picture: user.facebookPage.picture,
+  };
   const result: ClientUser = {
     name: user.name || undefined,
     email: user.email || undefined,
     image: user.image || undefined,
-    facebookAccessToken: user.facebookAccessToken,
-    facebookPages: pages,
+    facebookPage,
   };
   res.json(JSON.stringify(result));
 };
@@ -44,8 +40,8 @@ const updateUser = async (
     where: { accessToken: session.accessToken },
     select: ['userId'],
   });
-  const user: any = {};
-  console.log(req.body);
+  const user: Partial<User> = {};
+
   if (req.body.facebookAccessToken) {
     user.facebookAccessToken = req.body.facebookAccessToken;
   }
@@ -55,7 +51,7 @@ const updateUser = async (
     return res.status(400).end();
   }
   try {
-    await User.update({ id: userId }, { ...user });
+    await User.update(userId, { ...user });
     return res.status(200).end();
   } catch (error) {
     return res.status(500).json({ error: error.message });

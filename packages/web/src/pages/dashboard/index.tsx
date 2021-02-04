@@ -22,13 +22,13 @@ const DashboardPage = () => {
     return <RedirectingPage />;
   }
 
-  return user.facebookPages && user.facebookPages.length ? (
+  return user.facebookPage ? (
     <Flex flexDir="column" align="center">
       <Text fontWeight="extrabold" fontSize="5xl">
         Posts
       </Text>
       <Flex flexDir="column" maxW="7xl" align="center">
-        <PostTable pages={user.facebookPages} />
+        <PostTable page={user.facebookPage} />
       </Flex>
     </Flex>
   ) : (

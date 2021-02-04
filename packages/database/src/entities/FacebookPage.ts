@@ -1,10 +1,11 @@
 import {
   Entity,
   Column,
-  ManyToOne,
   OneToMany,
   PrimaryColumn,
   Index,
+  OneToOne,
+  JoinColumn,
 } from 'typeorm';
 import BaseEntityWithMetadata from '../baseEntity';
 import FacebookPost from './FacebookPost';
@@ -18,11 +19,9 @@ export default class FacebookPage extends BaseEntityWithMetadata {
   })
   id!: string;
 
-  @ManyToOne(() => User, (user) => user.facebookPages)
-  @Column({
-    name: 'page_owner',
-  })
-  pageOwner!: string;
+  @OneToOne(() => User, (user) => user.facebookPage, { onDelete: 'CASCADE' })
+  @JoinColumn()
+  owner!: User;
 
   @Column({
     name: 'name',
