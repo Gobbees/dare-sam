@@ -1,21 +1,40 @@
 import * as React from 'react';
-import { Button, Flex } from '@chakra-ui/react';
-import { FaFacebookF } from 'react-icons/fa';
+import { Button, VStack } from '@chakra-ui/react';
+import { FaFacebookF, FaTwitter } from 'react-icons/fa';
 import { signin } from 'next-auth/client';
 
 const LoginPage = () => (
-  <Flex flexDir="column" py={96} alignItems="center" justifyContent="center">
+  <VStack
+    spacing={4}
+    flexDir="column"
+    py={96}
+    alignItems="center"
+    justifyContent="center"
+  >
     <Button
+      w={64}
       colorScheme="facebook"
       leftIcon={<FaFacebookF />}
       onClick={() =>
         signin('facebook', {
-          callbackUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/account`,
+          callbackUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard`,
         })
       }
     >
       Login with Facebook
     </Button>
-  </Flex>
+    <Button
+      w={64}
+      colorScheme="twitter"
+      leftIcon={<FaTwitter />}
+      onClick={() =>
+        signin('twitter', {
+          callbackUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard`,
+        })
+      }
+    >
+      Login with Twitter
+    </Button>
+  </VStack>
 );
 export default LoginPage;

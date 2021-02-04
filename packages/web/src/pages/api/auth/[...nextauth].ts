@@ -9,6 +9,10 @@ export default async (req: NextApiRequest, res: NextApiResponse) =>
         clientId: process.env.FACEBOOK_APP_ID || '',
         clientSecret: process.env.FACEBOOK_APP_SECRET || '',
       }),
+      Providers.Twitter({
+        clientId: process.env.TWITTER_APP_ID || '',
+        clientSecret: process.env.TWITTER_APP_SECRET || '',
+      }),
     ],
     database: {
       type: 'postgres',
