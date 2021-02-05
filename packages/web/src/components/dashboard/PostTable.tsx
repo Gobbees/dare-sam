@@ -1,7 +1,6 @@
 import {
   Button,
   Flex,
-  HStack,
   Icon,
   Link,
   Spinner,
@@ -32,6 +31,7 @@ interface PostTableColumns {
   publishedDate: Date;
   message?: string;
   url: string;
+  commentsSentiment?: number;
   likesCount: number;
   sharesCount: number;
   commentsCount: number;
@@ -41,7 +41,6 @@ const PostTable: React.FC<PostTableProps> = (props: PostTableProps) => {
   const { data, status } = useQuery<FacebookPost[]>('facebook-posts', () =>
     fetchFacebookPostsForPage(props.page),
   );
-
   const { columns, tableData } = useTableData(data || []);
 
   const {
@@ -70,14 +69,11 @@ const PostTable: React.FC<PostTableProps> = (props: PostTableProps) => {
 
   return (
     <>
-      <HStack spacing={4}>
+      <Flex flexDir="column">
         <Button onClick={() => toggleAllRowsExpanded(false)}>
           Close all comments tabs
         </Button>
-        <Button onClick={() => toggleAllRowsExpanded(true)}>
-          Open all comments tabs
-        </Button>
-      </HStack>
+      </Flex>
       <Table {...getTableProps()}>
         <Thead>
           {headerGroups.map((headerGroup: any) => (
@@ -172,6 +168,29 @@ const useTableData = (posts: FacebookPost[]) => {
         ),
       },
       {
+        Header: 'Comments Sentiment',
+        accessor: 'commentsSentiment',
+        Cell: ({ value }) => {
+          let textColor;
+          if (!value && value !== 0) {
+            textColor = 'black';
+          } else if (value > 0) {
+            textColor = 'green.500';
+          } else if (value < 0) {
+            textColor = 'red.500';
+          } else {
+            textColor = 'gray.500';
+          }
+          return (
+            <Flex flexDir="row" align="center">
+              <Text fontWeight="extrabold" color={textColor}>
+                {!value && value !== 0 ? '/' : value}
+              </Text>
+            </Flex>
+          );
+        },
+      },
+      {
         Header: 'Like Count',
         accessor: 'likesCount',
         Cell: ({ value }) => (
@@ -210,6 +229,7 @@ const useTableData = (posts: FacebookPost[]) => {
         likesCount: post.likesCount,
         sharesCount: post.sharesCount,
         commentsCount: post.commentsCount,
+        commentsSentiment: post.commentsSentiment,
       })),
     [posts],
   );

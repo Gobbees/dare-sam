@@ -69,6 +69,7 @@ export default class FacebookPost extends BaseEntityWithMetadata {
 
   @Column({
     name: 'comments_overall_sentiment',
+    type: 'double precision',
     nullable: true,
   })
   commentsOverallSentiment!: number;

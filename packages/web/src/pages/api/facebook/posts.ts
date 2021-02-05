@@ -44,6 +44,7 @@ const posts = async (
       message: post.message,
       publishedDate: post.publishedDate,
       postSentiment: post.postSentiment,
+      commentsSentiment: post.commentsOverallSentiment,
       likesCount: post.likeCount,
       sharesCount: post.sharesCount,
       commentsCount: post.commentsCount,

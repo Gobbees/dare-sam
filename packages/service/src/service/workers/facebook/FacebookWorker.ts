@@ -12,8 +12,10 @@ import {
   fetchUnanalyzedReplies,
 } from '../../fetchers/facebook/db';
 import { fetchFacebookPagePosts } from '../../fetchers/facebook/graph';
-import submitToSentimentAnalysisService, {
+import {
+  recomputePostsOverallSentiment,
   SentimentAnalysisServiceRequest,
+  submitToSentimentAnalysisService,
 } from '../sentiment-analysis';
 
 const fetchFacebookData = async (
@@ -155,13 +157,10 @@ const fetchFacebookData = async (
       }
     }
   }
-  await fetchUnanalyzedAndSubmitToSA(page, fetchPageSince);
+  await updateSentiments(page, fetchPageSince);
 };
 
-const fetchUnanalyzedAndSubmitToSA = async (
-  page: FacebookPage,
-  fetchPageSince: Date,
-) => {
+const updateSentiments = async (page: FacebookPage, fetchPageSince: Date) => {
   // TODO find a better way to do this
   // posts
   const unanalyzedPosts = await fetchUnanalyzedPostsByPageAndPublishedDate(
@@ -184,7 +183,12 @@ const fetchUnanalyzedAndSubmitToSA = async (
     });
   }
 
-  // // comments + replies
+  // comments + replies
+
+  // list of posts that have some comments that changed, and so that needs to have their
+  // overall sentiment updated
+  const postsToBeRecomputed: string[] = [];
+
   const unanalyzedComments: Array<FacebookComment> = [];
   const pagePosts = await fetchPostsByPageAndPublishedDate(
     page,
@@ -193,6 +197,9 @@ const fetchUnanalyzedAndSubmitToSA = async (
 
   for (const post of pagePosts) {
     const unanalyzedCommentsForPost = await fetchUnanalyzedComments(post);
+    if (unanalyzedCommentsForPost.length) {
+      postsToBeRecomputed.push(post.id);
+    }
     unanalyzedComments.push(...unanalyzedCommentsForPost);
     const unanalyzedRepliesForPost = await fetchUnanalyzedReplies(post);
     unanalyzedComments.push(...unanalyzedRepliesForPost);
@@ -211,6 +218,20 @@ const fetchUnanalyzedAndSubmitToSA = async (
     await FacebookComment.update(comment.id, {
       overallSentiment: comment.sentiment,
     });
+  }
+  if (postsToBeRecomputed.length) {
+    await recomputePostsOverallSentiment(
+      postsToBeRecomputed,
+      async (postId: string) => {
+        const comments = await FacebookComment.findCommentsByPost(postId);
+        return comments.map((comment) => comment.overallSentiment);
+      },
+      async (postId: string, overallSentiment: number) => {
+        await FacebookPost.update(postId, {
+          commentsOverallSentiment: overallSentiment,
+        });
+      },
+    );
   }
 };
 // TODO add extra logging here
