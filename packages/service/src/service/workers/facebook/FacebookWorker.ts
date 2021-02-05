@@ -1,6 +1,5 @@
 /* eslint-disable no-restricted-syntax */
 import {
-  AnalyzedStatus,
   FacebookComment,
   FacebookPage,
   FacebookPost,
@@ -57,9 +56,6 @@ const fetchFacebookData = async (
         sharesCount: post.sharesCount,
         publishedDate: post.publishedDate,
         message: post.message,
-        analyzedStatus: shouldRecomputeSentiment
-          ? AnalyzedStatus.UNANALYZED
-          : AnalyzedStatus.ANALYZED,
         postSentiment: shouldRecomputeSentiment
           ? undefined
           : postInDB.postSentiment,
@@ -95,9 +91,6 @@ const fetchFacebookData = async (
             likeCount: comment.likeCount,
             message: comment.message,
             repliesCount: comment.repliesCount,
-            analyzedStatus: shouldRecomputeSentiment
-              ? AnalyzedStatus.UNANALYZED
-              : AnalyzedStatus.ANALYZED,
             overallSentiment: shouldRecomputeSentiment
               ? undefined
               : commentInDB.overallSentiment,
@@ -135,9 +128,6 @@ const fetchFacebookData = async (
               await FacebookComment.update(replyInDB.id, {
                 likeCount: reply.likeCount,
                 message: reply.message,
-                analyzedStatus: shouldRecomputeSentiment
-                  ? AnalyzedStatus.UNANALYZED
-                  : AnalyzedStatus.ANALYZED,
                 overallSentiment: shouldRecomputeSentiment
                   ? undefined
                   : replyInDB.overallSentiment,
@@ -188,14 +178,13 @@ const fetchUnanalyzedAndSubmitToSA = async (
   let sentimentAnalysisResult = await submitToSentimentAnalysisService(
     sentimentAnalysisServiceInput,
   );
-  for (const comment of sentimentAnalysisResult) {
-    await FacebookPost.update(comment.id, {
-      analyzedStatus: AnalyzedStatus.ANALYZED,
-      postSentiment: comment.sentiment,
+  for (const post of sentimentAnalysisResult) {
+    await FacebookPost.update(post.id, {
+      postSentiment: post.sentiment,
     });
   }
 
-  // comments + replies
+  // // comments + replies
   const unanalyzedComments: Array<FacebookComment> = [];
   const pagePosts = await fetchPostsByPageAndPublishedDate(
     page,
@@ -220,10 +209,10 @@ const fetchUnanalyzedAndSubmitToSA = async (
   );
   for (const comment of sentimentAnalysisResult) {
     await FacebookComment.update(comment.id, {
-      analyzedStatus: AnalyzedStatus.ANALYZED,
       overallSentiment: comment.sentiment,
     });
   }
 };
+// TODO add extra logging here
 
 export default fetchFacebookData;

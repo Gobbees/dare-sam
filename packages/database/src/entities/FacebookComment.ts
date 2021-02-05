@@ -7,10 +7,11 @@ import {
   PrimaryColumn,
   IsNull,
   Not,
+  FindConditions,
 } from 'typeorm';
 import BaseEntityWithMetadata from '../baseEntity';
 import FacebookPost from './FacebookPost';
-import { AnalyzedStatus, EntitySentiment, Sentiment } from '../commonValues';
+import { EntitySentiment, Sentiment } from '../commonValues';
 import { FindOptions } from './common/common';
 
 @Entity('facebook_comments')
@@ -55,14 +56,6 @@ export default class FacebookComment extends BaseEntityWithMetadata {
   overallSentiment!: Sentiment;
 
   @Column({
-    type: 'enum',
-    enum: AnalyzedStatus,
-    name: 'analyzed_status',
-    default: AnalyzedStatus.UNANALYZED,
-  })
-  analyzedStatus!: AnalyzedStatus;
-
-  @Column({
     name: 'replies_count',
     default: 0,
   })
@@ -82,30 +75,40 @@ export default class FacebookComment extends BaseEntityWithMetadata {
   static findCommentsByPost = async (
     post: FacebookPost,
     options?: FindOptions,
-  ) =>
-    FacebookComment.find({
+  ) => {
+    const optionsProps: Partial<FindConditions<FacebookComment>> = {};
+    if (options?.unanalyzedOnly) {
+      optionsProps.overallSentiment = IsNull();
+    }
+    if (options?.nonEmpty) {
+      optionsProps.message = Not(IsNull());
+    }
+    return FacebookComment.find({
       where: {
         post,
         replyTo: IsNull(),
-        analyzedStatus: options?.unanalyzedOnly
-          ? AnalyzedStatus.UNANALYZED
-          : undefined,
-        message: options?.nonEmpty ? Not(IsNull()) : undefined,
+        ...optionsProps,
       },
     });
+  };
 
   static findRepliesByPost = async (
     post: FacebookPost,
     options?: FindOptions,
-  ) =>
-    FacebookComment.find({
+  ) => {
+    const optionsProps: Partial<FindConditions<FacebookComment>> = {};
+    if (options?.unanalyzedOnly) {
+      optionsProps.overallSentiment = IsNull();
+    }
+    if (options?.nonEmpty) {
+      optionsProps.message = Not(IsNull());
+    }
+    return FacebookComment.find({
       where: {
         post,
         replyTo: Not(IsNull()),
-        analyzedStatus: options?.unanalyzedOnly
-          ? AnalyzedStatus.UNANALYZED
-          : undefined,
-        message: options?.nonEmpty ? Not(IsNull()) : undefined,
+        ...optionsProps,
       },
     });
+  };
 }

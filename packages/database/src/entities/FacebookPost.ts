@@ -8,9 +8,10 @@ import {
   MoreThanOrEqual,
   Not,
   IsNull,
+  FindConditions,
 } from 'typeorm';
 import BaseEntityWithMetadata from '../baseEntity';
-import { AnalyzedStatus, Sentiment } from '../commonValues';
+import { Sentiment } from '../commonValues';
 import { FindOptions } from './common/common';
 import FacebookComment from './FacebookComment';
 import FacebookPage from './FacebookPage';
@@ -67,14 +68,6 @@ export default class FacebookPost extends BaseEntityWithMetadata {
   postSentiment!: Sentiment;
 
   @Column({
-    type: 'enum',
-    enum: AnalyzedStatus,
-    name: 'analyzed_status',
-    default: AnalyzedStatus.UNANALYZED,
-  })
-  analyzedStatus!: AnalyzedStatus;
-
-  @Column({
     name: 'comments_overall_sentiment',
     nullable: true,
   })
@@ -86,18 +79,26 @@ export default class FacebookPost extends BaseEntityWithMetadata {
   @OneToMany(() => FacebookComment, (facebookComment) => facebookComment.post)
   comments!: FacebookComment[];
 
+  // Queries
+
   static findPostsByPageAndPublishedDate = async (
     page: FacebookPage,
     publishedDate: Date,
     options?: FindOptions,
-  ) =>
-    FacebookPost.find({
+  ) => {
+    const optionsProps: Partial<FindConditions<FacebookPost>> = {};
+    if (options?.unanalyzedOnly) {
+      optionsProps.postSentiment = IsNull();
+    }
+    if (options?.nonEmpty) {
+      optionsProps.message = Not(IsNull());
+    }
+    return FacebookPost.find({
       where: {
         page,
-        publishedDate: options?.unanalyzedOnly
-          ? MoreThanOrEqual(publishedDate)
-          : undefined,
-        message: options?.nonEmpty ? Not(IsNull()) : undefined,
+        publishedDate: MoreThanOrEqual(publishedDate),
+        ...optionsProps,
       },
     });
+  };
 }

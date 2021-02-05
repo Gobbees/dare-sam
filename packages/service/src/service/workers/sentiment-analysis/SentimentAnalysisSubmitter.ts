@@ -48,7 +48,7 @@ const submitToSentimentAnalysisService = async (
   );
   let splitterIndex = 0;
   const returnValue: SentimentAnalysisServiceResponse = [];
-  while (splitterIndex * MAX_API_SENTENCES <= request.sentences.length) {
+  while (splitterIndex * MAX_API_SENTENCES < request.sentences.length) {
     const azureSentences = request.sentences
       .slice(
         splitterIndex * MAX_API_SENTENCES,
