@@ -19,13 +19,13 @@ export const fetchPostsByPageAndPublishedDate = async (
 ) => FacebookPost.findPostsByPageAndPublishedDate(page, publishedDate);
 
 export const fetchUnanalyzedComments = async (post: FacebookPost) =>
-  FacebookComment.findCommentsByPost(post, {
+  FacebookComment.findCommentsByPost(post.id, {
     unanalyzedOnly: true,
     nonEmpty: true,
   });
 
 export const fetchUnanalyzedReplies = async (post: FacebookPost) =>
-  FacebookComment.findRepliesByPost(post, {
+  FacebookComment.findRepliesByPost(post.id, {
     unanalyzedOnly: true,
     nonEmpty: true,
   });

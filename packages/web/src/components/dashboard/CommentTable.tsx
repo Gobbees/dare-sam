@@ -57,7 +57,13 @@ const CommentTable: React.FC<CommentTableProps> = (
     );
   }
   if (data?.length === 0) {
-    return <>No comments for this post</>;
+    return (
+      <>
+        Uh oh, we don't have any comment for this post. This is probably because
+        the comments you received only contain pictures. To verify this, please
+        click on the post link.
+      </>
+    );
   }
   return (
     <Table w="4xl" {...getTableProps()}>

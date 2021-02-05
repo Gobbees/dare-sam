@@ -21,7 +21,8 @@ const DashboardPage = () => {
   if (!user) {
     return <RedirectingPage />;
   }
-
+  // TODO explain that the comment count can be different from the actual comments we show because
+  // empty comments are not saved in the system
   return user.facebookPage ? (
     <Flex flexDir="column" align="center">
       <Text fontWeight="extrabold" fontSize="5xl">

@@ -72,10 +72,7 @@ export default class FacebookComment extends BaseEntityWithMetadata {
 
   // Queries
 
-  static findCommentsByPost = async (
-    post: FacebookPost,
-    options?: FindOptions,
-  ) => {
+  static findCommentsByPost = async (postId: string, options?: FindOptions) => {
     const optionsProps: Partial<FindConditions<FacebookComment>> = {};
     if (options?.unanalyzedOnly) {
       optionsProps.overallSentiment = IsNull();
@@ -85,17 +82,14 @@ export default class FacebookComment extends BaseEntityWithMetadata {
     }
     return FacebookComment.find({
       where: {
-        post,
+        post: postId,
         replyTo: IsNull(),
         ...optionsProps,
       },
     });
   };
 
-  static findRepliesByPost = async (
-    post: FacebookPost,
-    options?: FindOptions,
-  ) => {
+  static findRepliesByPost = async (postId: string, options?: FindOptions) => {
     const optionsProps: Partial<FindConditions<FacebookComment>> = {};
     if (options?.unanalyzedOnly) {
       optionsProps.overallSentiment = IsNull();
@@ -105,7 +99,7 @@ export default class FacebookComment extends BaseEntityWithMetadata {
     }
     return FacebookComment.find({
       where: {
-        post,
+        post: postId,
         replyTo: Not(IsNull()),
         ...optionsProps,
       },
