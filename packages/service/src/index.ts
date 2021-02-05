@@ -2,7 +2,8 @@
 import { TypeOrmManager } from '@crystal-ball/database';
 import serviceConfig from '../serviceConfig';
 import { fetchAllUsers } from './service/fetchers/users';
-import fetchFacebookData from './service/workers/facebook/FacebookWorker';
+import fetchFacebookData from './service/workers/facebook';
+import fetchInstagramData from './service/workers/instagram';
 import sleepFor from './utils';
 
 require('dotenv-flow').config();
@@ -33,6 +34,9 @@ const service = async () => {
     const users = await fetchAllUsers();
     for (const user of users) {
       await fetchFacebookData(user, {
+        fetchSinceDays: serviceConfig.fetchSinceDays,
+      });
+      await fetchInstagramData(user, {
         fetchSinceDays: serviceConfig.fetchSinceDays,
       });
     }

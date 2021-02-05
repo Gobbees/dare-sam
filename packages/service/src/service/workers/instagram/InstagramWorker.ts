@@ -1,24 +1,24 @@
 /* eslint-disable no-restricted-syntax */
 import {
-  FacebookComment,
-  FacebookPage,
-  FacebookPost,
+  InstagramComment,
+  InstagramProfile,
+  InstagramPost,
   User,
 } from '@crystal-ball/database';
 import {
-  fetchPostsByPageAndPublishedDate,
+  fetchPostsByProfileAndPublishedDate,
   fetchUnanalyzedComments,
-  fetchUnanalyzedPostsByPageAndPublishedDate,
+  fetchUnanalyzedPostsByProfileAndPublishedDate,
   fetchUnanalyzedReplies,
-} from '../../fetchers/facebook/db';
-import { fetchFacebookPagePosts } from '../../fetchers/facebook/graph';
+} from '../../fetchers/instagram/db';
+import fetchInstagramProfilePosts from '../../fetchers/instagram/graph';
 import {
   recomputePostsOverallSentiment,
   SentimentAnalysisServiceRequest,
   submitToSentimentAnalysisService,
 } from '../sentiment-analysis';
 
-const fetchFacebookData = async (
+const fetchInstagramData = async (
   user: User,
   options: { fetchSinceDays: number },
 ) => {
@@ -27,15 +27,15 @@ const fetchFacebookData = async (
     new Date().getTime() - 1000 * 60 * 60 * 24 * options.fetchSinceDays,
   );
 
-  const page = user.facebookPage;
-  if (!page) {
+  const profile = user.instagramProfile;
+  if (!profile) {
     return;
   }
 
-  console.log(`Fetching Facebook page: ${page.name}`);
+  console.log(`Fetching Instagram profile: ${profile.name}`);
 
-  const posts = await fetchFacebookPagePosts({
-    pageId: page.id,
+  const posts = await fetchInstagramProfilePosts({
+    pageId: profile.id,
     token: user.facebookAccessToken,
     fromDate: fetchPageSince,
     withComments: true,
@@ -49,13 +49,12 @@ const fetchFacebookData = async (
 
   // updates posts
   for (const post of posts) {
-    let postInDB = await FacebookPost.findOne(post.id);
+    let postInDB = await InstagramPost.findOne(post.id);
     if (postInDB) {
       const shouldRecomputeSentiment = postInDB.message !== post.message;
-      await FacebookPost.update(postInDB.id, {
+      await InstagramPost.update(postInDB.id, {
         likeCount: post.likeCount,
         commentsCount: post.commentCount,
-        sharesCount: post.sharesCount,
         publishedDate: post.publishedDate,
         message: post.message,
         postSentiment: shouldRecomputeSentiment
@@ -64,44 +63,34 @@ const fetchFacebookData = async (
         pictureUrl: post.picture,
       });
     } else {
-      const response = await FacebookPost.insert({
+      const response = await InstagramPost.insert({
         id: post.id,
         publishedDate: post.publishedDate,
         message: post.message,
         pictureUrl: post.picture,
         commentsCount: post.commentCount,
-        sharesCount: post.sharesCount,
         likeCount: post.likeCount,
-        page,
+        profile,
       });
       console.log(
-        `Added Facebook post ${post.id} with id ${JSON.stringify(
+        `Added Instagram post ${post.id} with id ${JSON.stringify(
           response.identifiers[0].id,
         )}`,
       );
-      postInDB = await FacebookPost.findOne(post.id);
+      postInDB = await InstagramPost.findOne(post.id);
     }
 
     if (post.comments) {
       // updates post comments
       for (const comment of post.comments) {
-        let commentInDB = await FacebookComment.findOne(comment.id);
+        let commentInDB = await InstagramComment.findOne(comment.id);
         if (commentInDB) {
-          const shouldRecomputeSentiment =
-            commentInDB.message !== comment.message;
-          await FacebookComment.update(commentInDB.id, {
+          await InstagramComment.update(commentInDB.id, {
             likeCount: comment.likeCount,
-            message: comment.message,
             repliesCount: comment.repliesCount,
-            overallSentiment: shouldRecomputeSentiment
-              ? undefined
-              : commentInDB.overallSentiment,
-            entitiesSentiment: shouldRecomputeSentiment
-              ? undefined
-              : commentInDB.entitiesSentiment,
           });
-        } else if (comment.message) {
-          const response = await FacebookComment.insert({
+        } else {
+          const response = await InstagramComment.insert({
             id: comment.id,
             message: comment.message,
             publishedDate: comment.publishedDate,
@@ -110,35 +99,24 @@ const fetchFacebookData = async (
             post: postInDB,
           });
           console.log(
-            `Added Facebook comment ${comment.id} with id ${JSON.stringify(
+            `Added Instagram comment ${comment.id} with id ${JSON.stringify(
               response.identifiers[0].id,
             )}`,
           );
-          commentInDB = await FacebookComment.findOne(comment.id);
-        } else {
-          // eslint-disable-next-line no-continue
-          continue;
+          commentInDB = await InstagramComment.findOne(comment.id);
         }
 
         if (comment.replies) {
           // updates comment replies
           for (const reply of comment.replies) {
-            const replyInDB = await FacebookComment.findOne(reply.id);
+            const replyInDB = await InstagramComment.findOne(reply.id);
             if (replyInDB) {
-              const shouldRecomputeSentiment =
-                replyInDB.message !== reply.message;
-              await FacebookComment.update(replyInDB.id, {
+              await InstagramComment.update(replyInDB.id, {
                 likeCount: reply.likeCount,
                 message: reply.message,
-                overallSentiment: shouldRecomputeSentiment
-                  ? undefined
-                  : replyInDB.overallSentiment,
-                entitiesSentiment: shouldRecomputeSentiment
-                  ? undefined
-                  : replyInDB.entitiesSentiment,
               });
-            } else if (reply.message) {
-              const response = await FacebookComment.insert({
+            } else {
+              const response = await InstagramComment.insert({
                 id: reply.id,
                 message: reply.message,
                 publishedDate: reply.publishedDate,
@@ -147,7 +125,7 @@ const fetchFacebookData = async (
                 post: postInDB,
               });
               console.log(
-                `Added Facebook reply ${comment.id} with id ${JSON.stringify(
+                `Added Instagram reply ${comment.id} with id ${JSON.stringify(
                   response.identifiers[0].id,
                 )}`,
               );
@@ -157,14 +135,17 @@ const fetchFacebookData = async (
       }
     }
   }
-  await updateSentiments(page, fetchPageSince);
+  await updateSentiments(profile, fetchPageSince);
 };
 
-const updateSentiments = async (page: FacebookPage, fetchPageSince: Date) => {
+const updateSentiments = async (
+  profile: InstagramProfile,
+  fetchPageSince: Date,
+) => {
   // TODO find a better way to do this
   // posts
-  const unanalyzedPosts = await fetchUnanalyzedPostsByPageAndPublishedDate(
-    page,
+  const unanalyzedPosts = await fetchUnanalyzedPostsByProfileAndPublishedDate(
+    profile,
     fetchPageSince,
   );
   let sentimentAnalysisServiceInput: SentimentAnalysisServiceRequest = {
@@ -178,23 +159,19 @@ const updateSentiments = async (page: FacebookPage, fetchPageSince: Date) => {
     sentimentAnalysisServiceInput,
   );
   for (const post of sentimentAnalysisResult) {
-    await FacebookPost.update(post.id, {
+    await InstagramPost.update(post.id, {
       postSentiment: post.sentiment,
     });
   }
-
   // comments + replies
-
   // list of posts that have some comments that changed, and so that needs to have their
   // overall sentiment updated
   const postsToBeRecomputed: string[] = [];
-
-  const unanalyzedComments: Array<FacebookComment> = [];
-  const pagePosts = await fetchPostsByPageAndPublishedDate(
-    page,
+  const unanalyzedComments: Array<InstagramComment> = [];
+  const pagePosts = await fetchPostsByProfileAndPublishedDate(
+    profile,
     fetchPageSince,
   );
-
   for (const post of pagePosts) {
     const unanalyzedCommentsForPost = await fetchUnanalyzedComments(post);
     if (unanalyzedCommentsForPost.length) {
@@ -215,7 +192,7 @@ const updateSentiments = async (page: FacebookPage, fetchPageSince: Date) => {
     sentimentAnalysisServiceInput,
   );
   for (const comment of sentimentAnalysisResult) {
-    await FacebookComment.update(comment.id, {
+    await InstagramComment.update(comment.id, {
       overallSentiment: comment.sentiment,
     });
   }
@@ -223,11 +200,11 @@ const updateSentiments = async (page: FacebookPage, fetchPageSince: Date) => {
     await recomputePostsOverallSentiment(
       postsToBeRecomputed,
       async (postId: string) => {
-        const comments = await FacebookComment.findCommentsByPost(postId);
+        const comments = await InstagramComment.findCommentsByPost(postId);
         return comments.map((comment) => comment.overallSentiment);
       },
       async (postId: string, overallSentiment: number) => {
-        await FacebookPost.update(postId, {
+        await InstagramPost.update(postId, {
           commentsOverallSentiment: overallSentiment,
         });
       },
@@ -236,4 +213,4 @@ const updateSentiments = async (page: FacebookPage, fetchPageSince: Date) => {
 };
 // TODO add extra logging here
 
-export default fetchFacebookData;
+export default fetchInstagramData;

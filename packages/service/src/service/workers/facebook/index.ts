@@ -1,1 +1,3 @@
-export * from './FacebookWorker';
+import fetchFacebookData from './FacebookWorker';
+
+export default fetchFacebookData;

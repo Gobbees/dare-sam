@@ -10,13 +10,14 @@ import {
   FindConditions,
 } from 'typeorm';
 import BaseEntityWithMetadata from '../baseEntity';
-import FacebookPost from './FacebookPost';
 import { EntitySentiment, Sentiment } from '../commonValues';
 import { FindOptions } from './common/common';
+import InstagramPost from './InstagramPost';
 
-@Entity('facebook_comments')
-@Index('fb_comment_id', ['id'], { unique: true })
-export default class FacebookComment extends BaseEntityWithMetadata {
+@Entity('instagram_comments')
+@Index('ig_comment_id', ['id'], { unique: true })
+export default class InstagramComment extends BaseEntityWithMetadata {
+  // TODO this is temporary and will probably be merged with FacebookComments
   @PrimaryColumn({
     name: 'id',
   })
@@ -61,26 +62,26 @@ export default class FacebookComment extends BaseEntityWithMetadata {
   })
   repliesCount!: number;
 
-  @ManyToOne(() => FacebookPost, (post) => post.comments)
-  post!: FacebookPost;
+  @ManyToOne(() => InstagramPost, (post) => post.comments)
+  post!: InstagramPost;
 
-  @OneToMany(() => FacebookComment, (comment) => comment.replyTo)
-  replies!: FacebookComment[];
+  @OneToMany(() => InstagramComment, (comment) => comment.replyTo)
+  replies!: InstagramComment[];
 
-  @ManyToOne(() => FacebookComment, (comment) => comment.replies)
-  replyTo!: FacebookComment;
+  @ManyToOne(() => InstagramComment, (comment) => comment.replies)
+  replyTo!: InstagramComment;
 
   // Queries
 
   static findCommentsByPost = async (postId: string, options?: FindOptions) => {
-    const optionsProps: Partial<FindConditions<FacebookComment>> = {};
+    const optionsProps: Partial<FindConditions<InstagramComment>> = {};
     if (options?.unanalyzedOnly) {
       optionsProps.overallSentiment = IsNull();
     }
     if (options?.nonEmpty) {
       optionsProps.message = Not(IsNull());
     }
-    return FacebookComment.find({
+    return InstagramComment.find({
       where: {
         post: postId,
         replyTo: IsNull(),
@@ -90,14 +91,14 @@ export default class FacebookComment extends BaseEntityWithMetadata {
   };
 
   static findRepliesByPost = async (postId: string, options?: FindOptions) => {
-    const optionsProps: Partial<FindConditions<FacebookComment>> = {};
+    const optionsProps: Partial<FindConditions<InstagramComment>> = {};
     if (options?.unanalyzedOnly) {
       optionsProps.overallSentiment = IsNull();
     }
     if (options?.nonEmpty) {
       optionsProps.message = Not(IsNull());
     }
-    return FacebookComment.find({
+    return InstagramComment.find({
       where: {
         post: postId,
         replyTo: Not(IsNull()),

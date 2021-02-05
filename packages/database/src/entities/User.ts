@@ -7,6 +7,7 @@ import {
 } from 'typeorm';
 import BaseEntityWithMetadata from '../baseEntity';
 import FacebookPage from './FacebookPage';
+import InstagramProfile from './InstagramProfile';
 
 @Index('users_pkey', ['id'], { unique: true })
 @Entity('users')
@@ -45,7 +46,11 @@ export default class User extends BaseEntityWithMetadata {
   @OneToOne(() => FacebookPage, (facebookPage) => facebookPage.owner)
   facebookPage!: FacebookPage | undefined;
 
-  // instagramProfile!: InstagramProfile | undefined;
+  @OneToOne(
+    () => InstagramProfile,
+    (instagramProfile) => instagramProfile.owner,
+  )
+  instagramProfile!: InstagramProfile | undefined;
 
   // twitterAccount!: TwitterAccount | undefined;
 }

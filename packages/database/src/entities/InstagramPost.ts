@@ -13,12 +13,13 @@ import {
 import BaseEntityWithMetadata from '../baseEntity';
 import { Sentiment } from '../commonValues';
 import { FindOptions } from './common/common';
-import FacebookComment from './FacebookComment';
-import FacebookPage from './FacebookPage';
+import InstagramComment from './InstagramComment';
+import InstagramProfile from './InstagramProfile';
 
-@Entity('facebook_posts')
-@Index('fb_post_pkey', ['id'], { unique: true })
-export default class FacebookPost extends BaseEntityWithMetadata {
+@Entity('instagram_posts')
+@Index('ig_post_pkey', ['id'], { unique: true })
+export default class InstagramPost extends BaseEntityWithMetadata {
+  // TODO this is temporary and will probably be merged with FacebookPost
   @PrimaryColumn({
     name: 'id',
   })
@@ -40,12 +41,6 @@ export default class FacebookPost extends BaseEntityWithMetadata {
     name: 'like_count',
   })
   likeCount!: number;
-
-  @Column({
-    name: 'shares_count',
-    default: 0,
-  })
-  sharesCount!: number;
 
   @Column({
     name: 'comments_count',
@@ -74,29 +69,35 @@ export default class FacebookPost extends BaseEntityWithMetadata {
   })
   commentsOverallSentiment!: number;
 
-  @ManyToOne(() => FacebookPage, (facebookPage) => facebookPage.posts)
-  page!: FacebookPage;
+  @ManyToOne(
+    () => InstagramProfile,
+    (instagramProfile) => instagramProfile.posts,
+  )
+  profile!: InstagramProfile;
 
-  @OneToMany(() => FacebookComment, (facebookComment) => facebookComment.post)
-  comments!: FacebookComment[];
+  @OneToMany(
+    () => InstagramComment,
+    (instagramComment) => instagramComment.post,
+  )
+  comments!: InstagramComment[];
 
   // Queries
 
-  static findPostsByPageAndPublishedDate = async (
-    page: FacebookPage,
+  static findPostsByProfileAndPublishedDate = async (
+    profile: InstagramProfile,
     publishedDate: Date,
     options?: FindOptions,
   ) => {
-    const optionsProps: Partial<FindConditions<FacebookPost>> = {};
+    const optionsProps: Partial<FindConditions<InstagramPost>> = {};
     if (options?.unanalyzedOnly) {
       optionsProps.postSentiment = IsNull();
     }
     if (options?.nonEmpty) {
       optionsProps.message = Not(IsNull());
     }
-    return FacebookPost.find({
+    return InstagramPost.find({
       where: {
-        page,
+        profile,
         publishedDate: MoreThanOrEqual(publishedDate),
         ...optionsProps,
       },

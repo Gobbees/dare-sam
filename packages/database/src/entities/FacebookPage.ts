@@ -12,7 +12,7 @@ import FacebookPost from './FacebookPost';
 import User from './User';
 
 @Entity('facebook_pages')
-@Index('page_pkey', ['id'], { unique: true })
+@Index('fb_page_pkey', ['id'], { unique: true })
 export default class FacebookPage extends BaseEntityWithMetadata {
   @PrimaryColumn({
     name: 'id',
