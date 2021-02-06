@@ -8,6 +8,7 @@ import ProfilesConnector from '../components/account/ProfilesConnector';
 import YourProfilesSection from '../components/account/YourProfiles';
 import ProfilesSelector from '../components/account/ProfilesSelector';
 import { FacebookPage, InstagramProfile } from '../types';
+import Navbar from '../components/common/Navbar';
 
 interface AccountPageState {
   profilesState?: {
@@ -62,6 +63,7 @@ const AccountPage = () => {
       <Head>
         <title>Account | Crystal Ball</title>
       </Head>
+      <Navbar />
       <Box pt={24}>
         <Flex
           flexDir="column"

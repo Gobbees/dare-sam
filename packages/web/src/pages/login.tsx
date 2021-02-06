@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Button, VStack } from '@chakra-ui/react';
 import { FaFacebookF, FaTwitter } from 'react-icons/fa';
 import { signin } from 'next-auth/client';
+import Logo from '../components/common/Logo';
 
 const LoginPage = () => (
   <VStack
@@ -11,6 +12,7 @@ const LoginPage = () => (
     alignItems="center"
     justifyContent="center"
   >
+    <Logo showText />
     <Button
       w={64}
       colorScheme="facebook"

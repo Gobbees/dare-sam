@@ -125,7 +125,7 @@ const ProfilesSelector: React.FC<ProfilesSelectorProps> = (
                       ))}
                     </HStack>
                   </RadioGroup>
-                  <Button type="submit" colorScheme="facebook">
+                  <Button type="submit" colorScheme="facebook" shadow="lg">
                     Save your page
                   </Button>
                 </VStack>
@@ -190,7 +190,7 @@ const ProfilesSelector: React.FC<ProfilesSelectorProps> = (
                       ))}
                     </HStack>
                   </RadioGroup>
-                  <Button type="submit" colorScheme="teal">
+                  <Button type="submit" colorScheme="instagram" shadow="lg">
                     Save your profile
                   </Button>
                 </VStack>
