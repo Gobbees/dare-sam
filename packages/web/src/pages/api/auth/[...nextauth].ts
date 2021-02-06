@@ -5,13 +5,16 @@ import Providers from 'next-auth/providers';
 export default async (req: NextApiRequest, res: NextApiResponse) =>
   NextAuth(req, res, {
     providers: [
-      Providers.Facebook({
-        clientId: process.env.FACEBOOK_APP_ID || '',
-        clientSecret: process.env.FACEBOOK_APP_SECRET || '',
-      }),
-      Providers.Twitter({
-        clientId: process.env.TWITTER_APP_ID || '',
-        clientSecret: process.env.TWITTER_APP_SECRET || '',
+      Providers.Email({
+        server: {
+          host: process.env.SMTP_HOST || '',
+          port: Number(process.env.SMTP_PORT),
+          auth: {
+            user: process.env.SMTP_USER || '',
+            pass: process.env.SMTP_PASSWORD || '',
+          },
+        },
+        from: process.env.SMTP_FROM || '',
       }),
     ],
     database: {
