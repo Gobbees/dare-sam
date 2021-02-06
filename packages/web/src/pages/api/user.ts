@@ -1,7 +1,11 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Session } from 'next-auth/client';
 import { Session as NextSession, User } from '@crystal-ball/database';
-import { FacebookPage, User as ClientUser } from '../../types';
+import {
+  FacebookPage,
+  InstagramProfile,
+  User as ClientUser,
+} from '../../types';
 import authenticatedRoute from '../../app/utils/apiRoutes';
 
 const getUser = async (
@@ -15,20 +19,29 @@ const getUser = async (
   });
   const user = await User.findOneOrFail({
     where: { id: userId },
-    relations: ['facebookPage'],
+    relations: ['facebookPage', 'instagramProfile'],
   });
   const facebookPage: FacebookPage | undefined = user.facebookPage && {
     id: user.facebookPage.id,
     name: user.facebookPage.name,
     picture: user.facebookPage.picture,
   };
+  const instagramProfile:
+    | InstagramProfile
+    | undefined = user.instagramProfile && {
+    id: user.instagramProfile.id,
+    name: user.instagramProfile.name,
+    picture: user.instagramProfile.picture,
+  };
+
   const result: ClientUser = {
     name: user.name || undefined,
     email: user.email || undefined,
     image: user.image || undefined,
     facebookPage,
+    instagramProfile,
   };
-  res.json(JSON.stringify(result));
+  return res.status(200).json(JSON.stringify(result));
 };
 
 const updateUser = async (

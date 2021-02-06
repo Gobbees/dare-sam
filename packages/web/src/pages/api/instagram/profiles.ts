@@ -1,10 +1,13 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Session } from 'next-auth/client';
-import { FacebookPage, Session as NextSession } from '@crystal-ball/database';
-import { FacebookPage as ClientFBPage } from '../../../types';
+import {
+  InstagramProfile,
+  Session as NextSession,
+} from '@crystal-ball/database';
+import { InstagramProfile as ClientIGProfile } from '../../../types';
 import authenticatedRoute from '../../../app/utils/apiRoutes';
 
-const createPage = async (
+const createProfile = async (
   req: NextApiRequest,
   res: NextApiResponse,
   session: Session,
@@ -13,13 +16,12 @@ const createPage = async (
     where: { accessToken: session.accessToken },
     select: ['userId'],
   });
-  const page: ClientFBPage = { ...req.body.page };
-
+  const profile: ClientIGProfile = { ...req.body.profile };
   try {
-    await FacebookPage.insert({
-      id: page.id,
-      name: page.name,
-      picture: page.picture,
+    await InstagramProfile.insert({
+      id: profile.id,
+      name: profile.name,
+      picture: profile.picture,
       owner: { id: userId },
     });
     return res.status(200).end();
@@ -29,16 +31,17 @@ const createPage = async (
   }
 };
 
-const pages = async (
+const profiles = async (
   req: NextApiRequest,
   res: NextApiResponse,
   session: Session,
 ) => {
   if (req.method === 'POST') {
-    return createPage(req, res, session);
+    console.log('POST');
+    return createProfile(req, res, session);
   }
   return res.status(404).end();
 };
 
 export default async (req: NextApiRequest, res: NextApiResponse) =>
-  authenticatedRoute(req, res, pages);
+  authenticatedRoute(req, res, profiles);
