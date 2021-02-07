@@ -2,7 +2,7 @@
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-await-in-loop */
 import { sendTokenizedRequest, sendPagedRequest } from '@crystal-ball/common';
-import { FacebookPost, FacebookPostComment } from '../types';
+import { FacebookPost, FacebookPostComment } from './types';
 
 // increase limit in order to have bigger pages and avoid some API calls
 const MAX_LIMIT = 100;

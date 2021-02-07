@@ -6,7 +6,7 @@ import {
   FaRegMehBlank,
   FaRegSadTear,
 } from 'react-icons/fa';
-import { Sentiment } from '../types';
+import { Sentiment } from '@crystal-ball/common';
 
 interface SentimentEmojiProps {
   sentiment: Sentiment;
@@ -19,22 +19,22 @@ const SentimentEmoji: React.FC<SentimentEmojiProps> = (
   let emojiIcon: React.ReactElement;
   // eslint-disable-next-line default-case
   switch (props.sentiment) {
-    case Sentiment.POSITIVE:
+    case Sentiment.Positive:
       emojiIcon = (
         <Icon as={FaRegLaughBeam} color="green.500" {...props.extraStyles} />
       );
       break;
-    case Sentiment.NEGATIVE:
+    case Sentiment.Negative:
       emojiIcon = (
         <Icon as={FaRegSadTear} color="red.500" {...props.extraStyles} />
       );
       break;
-    case Sentiment.MIXED:
+    case Sentiment.Mixed:
       emojiIcon = (
         <Icon as={FaRegMehBlank} color="yellow.400" {...props.extraStyles} />
       );
       break;
-    case Sentiment.NEUTRAL:
+    case Sentiment.Neutral:
       emojiIcon = (
         <Icon as={FaRegMeh} color="gray.500" {...props.extraStyles} />
       );

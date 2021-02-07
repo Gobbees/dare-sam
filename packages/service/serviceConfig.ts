@@ -4,4 +4,5 @@ export default {
   // fetch interval for the workers: numbers of days to
   // subtract to the current date to calculate the fetch interval
   fetchSinceDays: 15000,
+  computeSentiment: false,
 };

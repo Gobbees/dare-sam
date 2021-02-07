@@ -17,10 +17,10 @@ const getUser = async (
     where: { accessToken: session.accessToken },
     select: ['userId'],
   });
-  const user = await User.findOneOrFail({
-    where: { id: userId },
-    relations: ['facebookPage', 'instagramProfile'],
-  });
+  const user = await User.findOneUserWithProfiles(userId);
+  if (!user) {
+    return res.status(404).end();
+  }
   const facebookPage: FacebookPage | undefined = user.facebookPage && {
     id: user.facebookPage.id,
     name: user.facebookPage.name,
@@ -35,9 +35,9 @@ const getUser = async (
   };
 
   const result: ClientUser = {
-    name: user.name || undefined,
-    email: user.email || undefined,
-    image: user.image || undefined,
+    name: user.user.name || undefined,
+    email: user.user.email || undefined,
+    image: user.user.image || undefined,
     facebookPage,
     instagramProfile,
   };

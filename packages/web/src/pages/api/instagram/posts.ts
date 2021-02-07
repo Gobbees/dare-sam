@@ -1,8 +1,9 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Session } from 'next-auth/client';
+import { Source } from '@crystal-ball/common';
 import {
-  InstagramProfile,
-  InstagramPost,
+  SocialProfile,
+  Post,
   Session as NextSession,
 } from '@crystal-ball/database';
 import authenticatedRoute from '../../../app/utils/apiRoutes';
@@ -25,15 +26,15 @@ const posts = async (
     return res.status(400).end();
   }
 
-  const instagramProfile = await InstagramProfile.findOne({
-    where: { id: profileId, owner: userId },
+  const instagramProfile = await SocialProfile.findOne({
+    where: { source: Source.Instagram, owner: userId },
   });
   if (!instagramProfile) {
     return res.status(404).end();
   }
 
-  const dbPosts = await InstagramPost.find({
-    where: { profile: instagramProfile.id },
+  const dbPosts = await Post.find({
+    where: { parentProfile: instagramProfile.id },
     order: { publishedDate: 'DESC' },
   });
 
@@ -43,10 +44,10 @@ const posts = async (
       id: post.id,
       message: post.message,
       publishedDate: post.publishedDate,
-      postSentiment: post.postSentiment,
+      postSentiment: post.sentiment,
       commentsSentiment: post.commentsOverallSentiment,
       likesCount: post.likeCount,
-      commentsCount: post.commentsCount,
+      commentsCount: post.commentCount,
     }),
   );
   return res.status(200).json(JSON.stringify(instagramPosts));

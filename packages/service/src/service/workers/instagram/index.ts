@@ -1,3 +1,3 @@
-import fetchInstagramData from './InstagramWorker';
+import instagramWorker from './InstagramWorker';
 
-export default fetchInstagramData;
+export default instagramWorker;

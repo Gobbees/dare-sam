@@ -1,3 +1,3 @@
-import fetchFacebookData from './FacebookWorker';
+import facebookPageWorker from './FacebookWorker';
 
-export default fetchFacebookData;
+export default facebookPageWorker;

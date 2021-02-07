@@ -1,8 +1,8 @@
 {
   "name": "@crystal-ball/database",
   "version": "1.0.0",
-  "main": "dist/index.js",
-  "typings": "dist/index.d.ts",
+  "main": "dist/database/src/index.js",
+  "typings": "dist/database/src/index.d.ts",
   "description": "Database Entities and types for Crystal Ball",
   "author": "Giovanni Gobbi",
   "license": "MIT",
@@ -16,6 +16,7 @@
     "rimraf": "^3.0.2"
   },
   "dependencies": {
+    "@crystal-ball/common": "^1.0.0",
     "pg": "^8.5.1",
     "reflect-metadata": "^0.1.13",
     "typeorm": "^0.2.29"

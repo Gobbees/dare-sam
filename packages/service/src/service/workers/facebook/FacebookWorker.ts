@@ -1,239 +1,147 @@
 /* eslint-disable no-restricted-syntax */
-import {
-  FacebookComment,
-  FacebookPage,
-  FacebookPost,
-  User,
-} from '@crystal-ball/database';
-import {
-  fetchPostsByPageAndPublishedDate,
-  fetchUnanalyzedComments,
-  fetchUnanalyzedPostsByPageAndPublishedDate,
-  fetchUnanalyzedReplies,
-} from '../../fetchers/facebook/db';
-import { fetchFacebookPagePosts } from '../../fetchers/facebook/graph';
-import {
-  recomputePostsOverallSentiment,
-  SentimentAnalysisServiceRequest,
-  submitToSentimentAnalysisService,
-} from '../sentiment-analysis';
+import { Source } from '@crystal-ball/common';
+import { Comment, Post, SocialProfile } from '@crystal-ball/database';
+import { fetchFacebookPagePosts } from '../../fetchers/facebook';
 
-const fetchFacebookData = async (
-  user: User,
-  options: { fetchSinceDays: number },
+const facebookPageWorker = async (
+  page: SocialProfile,
+  token: string,
+  fetchSinceDate: Date,
 ) => {
-  // fetch interval
-  const fetchPageSince = new Date(
-    new Date().getTime() - 1000 * 60 * 60 * 24 * options.fetchSinceDays,
-  );
-
-  const page = user.facebookPage;
-  if (!page) {
-    return;
-  }
-
   console.log(`Fetching Facebook page: ${page.name}`);
 
   const posts = await fetchFacebookPagePosts({
-    pageId: page.id,
-    token: user.facebookAccessToken,
-    fromDate: fetchPageSince,
+    pageId: page.externalId,
+    token,
+    fromDate: fetchSinceDate,
     withComments: true,
     withCommentsReplies: true,
   });
-  // TODO wrap every function call in a manageCall
-  // that handles all the GraphErrors and reacts accordingly
+
   if (!posts) {
     return;
   }
 
   // updates posts
   for (const post of posts) {
-    let postInDB = await FacebookPost.findOne(post.id);
+    let postInDB = await Post.findOneBySource(Source.Facebook, post.id);
+    let postUpdateProperties: Partial<Post> = {};
     if (postInDB) {
       const shouldRecomputeSentiment = postInDB.message !== post.message;
-      await FacebookPost.update(postInDB.id, {
+      postUpdateProperties = {
         likeCount: post.likeCount,
-        commentsCount: post.commentCount,
-        sharesCount: post.sharesCount,
+        commentCount: post.commentCount,
+        shareCount: post.sharesCount,
         publishedDate: post.publishedDate,
         message: post.message,
-        postSentiment: shouldRecomputeSentiment
-          ? undefined
-          : postInDB.postSentiment,
-        pictureUrl: post.picture,
-      });
+        sentiment: shouldRecomputeSentiment ? undefined : postInDB.sentiment,
+        picture: post.picture,
+      };
     } else {
-      const response = await FacebookPost.insert({
-        id: post.id,
+      postUpdateProperties = {
+        externalId: post.id,
+        source: Source.Facebook,
         publishedDate: post.publishedDate,
         message: post.message,
-        pictureUrl: post.picture,
-        commentsCount: post.commentCount,
-        sharesCount: post.sharesCount,
+        picture: post.picture,
+        commentCount: post.commentCount,
+        shareCount: post.sharesCount,
         likeCount: post.likeCount,
-        page,
-      });
-      console.log(
-        `Added Facebook post ${post.id} with id ${JSON.stringify(
-          response.identifiers[0].id,
-        )}`,
-      );
-      postInDB = await FacebookPost.findOne(post.id);
+        parentProfile: page,
+      };
     }
+    postInDB = await Post.save({
+      ...postInDB,
+      ...postUpdateProperties,
+    } as Post);
 
     if (post.comments) {
       // updates post comments
       for (const comment of post.comments) {
-        let commentInDB = await FacebookComment.findOne(comment.id);
+        let commentInDB = await Comment.findOneBySource(
+          Source.Facebook,
+          comment.id,
+        );
+        let commentUpdateProperties: Partial<Comment> = {};
         if (commentInDB) {
           const shouldRecomputeSentiment =
             commentInDB.message !== comment.message;
-          await FacebookComment.update(commentInDB.id, {
+          commentUpdateProperties = {
             likeCount: comment.likeCount,
             message: comment.message,
             repliesCount: comment.repliesCount,
-            overallSentiment: shouldRecomputeSentiment
+            sentiment: shouldRecomputeSentiment
               ? undefined
-              : commentInDB.overallSentiment,
+              : commentInDB.sentiment,
             entitiesSentiment: shouldRecomputeSentiment
               ? undefined
               : commentInDB.entitiesSentiment,
-          });
+          };
         } else if (comment.message) {
-          const response = await FacebookComment.insert({
-            id: comment.id,
+          commentUpdateProperties = {
+            externalId: comment.id,
+            source: Source.Facebook,
             message: comment.message,
             publishedDate: comment.publishedDate,
             repliesCount: comment.repliesCount,
             likeCount: comment.likeCount,
-            post: postInDB,
-          });
-          console.log(
-            `Added Facebook comment ${comment.id} with id ${JSON.stringify(
-              response.identifiers[0].id,
-            )}`,
-          );
-          commentInDB = await FacebookComment.findOne(comment.id);
+            parentPost: postInDB,
+          };
         } else {
+          // this skips comments without message since we don't need them
           // eslint-disable-next-line no-continue
           continue;
         }
+        commentInDB = await Comment.save({
+          ...commentInDB,
+          ...commentUpdateProperties,
+        } as Comment);
 
         if (comment.replies) {
           // updates comment replies
           for (const reply of comment.replies) {
-            const replyInDB = await FacebookComment.findOne(reply.id);
+            let replyInDB = await Comment.findOneBySource(
+              Source.Facebook,
+              reply.id,
+            );
+            let replyUpdateProperties: Partial<Comment> = {};
             if (replyInDB) {
               const shouldRecomputeSentiment =
                 replyInDB.message !== reply.message;
-              await FacebookComment.update(replyInDB.id, {
+              replyUpdateProperties = {
                 likeCount: reply.likeCount,
                 message: reply.message,
-                overallSentiment: shouldRecomputeSentiment
+                sentiment: shouldRecomputeSentiment
                   ? undefined
-                  : replyInDB.overallSentiment,
+                  : replyInDB.sentiment,
                 entitiesSentiment: shouldRecomputeSentiment
                   ? undefined
                   : replyInDB.entitiesSentiment,
-              });
+              };
             } else if (reply.message) {
-              const response = await FacebookComment.insert({
-                id: reply.id,
+              replyUpdateProperties = {
+                externalId: reply.id,
+                source: Source.Facebook,
                 message: reply.message,
                 publishedDate: reply.publishedDate,
                 likeCount: reply.likeCount,
                 replyTo: commentInDB,
-                post: postInDB,
-              });
-              console.log(
-                `Added Facebook reply ${comment.id} with id ${JSON.stringify(
-                  response.identifiers[0].id,
-                )}`,
-              );
+                parentPost: postInDB,
+              };
+            } else {
+              // this skips empty replies
+              // eslint-disable-next-line no-continue
+              continue;
             }
+            replyInDB = await Comment.save({
+              ...replyInDB,
+              ...replyUpdateProperties,
+            } as Comment);
           }
         }
       }
     }
   }
-  await updateSentiments(page, fetchPageSince);
 };
 
-const updateSentiments = async (page: FacebookPage, fetchPageSince: Date) => {
-  // TODO find a better way to do this
-  // posts
-  const unanalyzedPosts = await fetchUnanalyzedPostsByPageAndPublishedDate(
-    page,
-    fetchPageSince,
-  );
-  let sentimentAnalysisServiceInput: SentimentAnalysisServiceRequest = {
-    sentences: unanalyzedPosts.map((post) => ({
-      id: post.id,
-      message: post.message,
-    })),
-    languageCode: 'it', // TODO change this to be a user setting
-  };
-  let sentimentAnalysisResult = await submitToSentimentAnalysisService(
-    sentimentAnalysisServiceInput,
-  );
-  for (const post of sentimentAnalysisResult) {
-    await FacebookPost.update(post.id, {
-      postSentiment: post.sentiment,
-    });
-  }
-
-  // comments + replies
-
-  // list of posts that have some comments that changed, and so that needs to have their
-  // overall sentiment updated
-  const postsToBeRecomputed: string[] = [];
-
-  const unanalyzedComments: Array<FacebookComment> = [];
-  const pagePosts = await fetchPostsByPageAndPublishedDate(
-    page,
-    fetchPageSince,
-  );
-
-  for (const post of pagePosts) {
-    const unanalyzedCommentsForPost = await fetchUnanalyzedComments(post);
-    if (unanalyzedCommentsForPost.length) {
-      postsToBeRecomputed.push(post.id);
-    }
-    unanalyzedComments.push(...unanalyzedCommentsForPost);
-    const unanalyzedRepliesForPost = await fetchUnanalyzedReplies(post);
-    unanalyzedComments.push(...unanalyzedRepliesForPost);
-  }
-  sentimentAnalysisServiceInput = {
-    sentences: unanalyzedComments.map((comment) => ({
-      id: comment.id,
-      message: comment.message,
-    })),
-    languageCode: 'it', // TODO change this to be a user setting
-  };
-  sentimentAnalysisResult = await submitToSentimentAnalysisService(
-    sentimentAnalysisServiceInput,
-  );
-  for (const comment of sentimentAnalysisResult) {
-    await FacebookComment.update(comment.id, {
-      overallSentiment: comment.sentiment,
-    });
-  }
-  if (postsToBeRecomputed.length) {
-    await recomputePostsOverallSentiment(
-      postsToBeRecomputed,
-      async (postId: string) => {
-        const comments = await FacebookComment.findCommentsByPost(postId);
-        return comments.map((comment) => comment.overallSentiment);
-      },
-      async (postId: string, overallSentiment: number) => {
-        await FacebookPost.update(postId, {
-          commentsOverallSentiment: overallSentiment,
-        });
-      },
-    );
-  }
-};
-// TODO add extra logging here
-
-export default fetchFacebookData;
+export default facebookPageWorker;

@@ -11,13 +11,14 @@ import {
   Thead,
   Tr,
 } from '@chakra-ui/react';
+import { Sentiment } from '@crystal-ball/common';
 import React from 'react';
 import { AiFillFacebook } from 'react-icons/ai';
 import { BiLike } from 'react-icons/bi';
 import { useQuery } from 'react-query';
 import { Column, useTable } from 'react-table';
 import { fetchFacebookCommentsForPost } from '../../app/api/facebook';
-import { FacebookComment, Sentiment } from '../../types';
+import { FacebookComment } from '../../types';
 import SentimentEmoji from '../SentimentEmoji';
 
 interface CommentTableProps {

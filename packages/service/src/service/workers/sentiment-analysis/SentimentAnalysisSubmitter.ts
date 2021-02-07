@@ -3,7 +3,7 @@ import {
   AzureKeyCredential,
   AnalyzeSentimentSuccessResult,
 } from '@azure/ai-text-analytics';
-import { Sentiment } from '@crystal-ball/database';
+import { Sentiment } from '@crystal-ball/common';
 
 export type SentimentAnalysisServiceResponse = Array<{
   id: string;
@@ -22,10 +22,10 @@ export interface SentimentAnalysisServiceRequest {
  * see {@link AnalyzeSentimentSuccessResult}
  */
 const azureSentimentToCBSentiment = {
-  positive: Sentiment.POSITIVE,
-  negative: Sentiment.NEGATIVE,
-  neutral: Sentiment.NEUTRAL,
-  mixed: Sentiment.MIXED,
+  positive: Sentiment.Positive,
+  negative: Sentiment.Negative,
+  neutral: Sentiment.Neutral,
+  mixed: Sentiment.Mixed,
 };
 
 const MAX_API_SENTENCES = 10;

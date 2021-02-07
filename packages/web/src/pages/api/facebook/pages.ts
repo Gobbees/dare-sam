@@ -1,6 +1,11 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Session } from 'next-auth/client';
-import { FacebookPage, Session as NextSession } from '@crystal-ball/database';
+import { Source } from '@crystal-ball/common';
+import {
+  SocialProfile,
+  Session as NextSession,
+  User,
+} from '@crystal-ball/database';
 import { FacebookPage as ClientFBPage } from '../../../types';
 import authenticatedRoute from '../../../app/utils/apiRoutes';
 
@@ -16,12 +21,27 @@ const createPage = async (
   const page: ClientFBPage = { ...req.body.page };
 
   try {
-    await FacebookPage.insert({
-      id: page.id,
+    const facebookPage = await SocialProfile.findOne({
+      where: { externalId: page.id },
+    });
+    if (facebookPage) {
+      console.error(
+        `Trying to add an already present Facebook Page: ${facebookPage.id}`,
+      );
+      return res.status(400).json({
+        error:
+          "The Facebook Page you're trying to add is already present. Please try with another one.",
+      });
+    }
+    const createdPage = await SocialProfile.insert({
+      externalId: page.id,
+      source: Source.Facebook,
       name: page.name,
       picture: page.picture,
       owner: { id: userId },
     });
+    const createdPageId = createdPage.identifiers[0].id;
+    await User.update(userId, { facebookPageId: createdPageId });
     return res.status(200).end();
   } catch (error) {
     console.error(error.message);

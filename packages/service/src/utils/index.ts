@@ -1,3 +1,4 @@
 import sleepFor from './sleep';
+import fetchSinceDays from './fetchSince';
 
-export default sleepFor;
+export { sleepFor, fetchSinceDays };

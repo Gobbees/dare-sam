@@ -1,8 +1,10 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Session } from 'next-auth/client';
+import { Source } from '@crystal-ball/common';
 import {
-  InstagramProfile,
+  SocialProfile,
   Session as NextSession,
+  User,
 } from '@crystal-ball/database';
 import { InstagramProfile as ClientIGProfile } from '../../../types';
 import authenticatedRoute from '../../../app/utils/apiRoutes';
@@ -18,12 +20,27 @@ const createProfile = async (
   });
   const profile: ClientIGProfile = { ...req.body.profile };
   try {
-    await InstagramProfile.insert({
-      id: profile.id,
+    const instagrampProfile = await SocialProfile.findOne({
+      where: { externalId: profile.id },
+    });
+    if (instagrampProfile) {
+      console.error(
+        `Trying to add an already present Instagram Profile: ${instagrampProfile.id}`,
+      );
+      return res.status(400).json({
+        error:
+          "The Instagram Profile you're trying to add is already present. Please try with another one.",
+      });
+    }
+    const createdProfile = await SocialProfile.insert({
+      externalId: profile.id,
+      source: Source.Instagram,
       name: profile.name,
       picture: profile.picture,
       owner: { id: userId },
     });
+    const createdProfileId = createdProfile.identifiers[0].id;
+    await User.update(userId, { instagramProfileId: createdProfileId });
     return res.status(200).end();
   } catch (error) {
     console.error(error.message);
@@ -37,7 +54,6 @@ const profiles = async (
   session: Session,
 ) => {
   if (req.method === 'POST') {
-    console.log('POST');
     return createProfile(req, res, session);
   }
   return res.status(404).end();

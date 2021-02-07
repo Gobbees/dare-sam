@@ -18,5 +18,4 @@ COPY ./packages/service/.env.production ./packages/service/.env
 
 WORKDIR /crystal-ball/packages/service
 
-# CMD ["cat", ".env.production"]
 CMD ["node", "dist/service/src/index.js"]

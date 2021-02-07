@@ -4,8 +4,9 @@
   "description": "Crystall Ball Full Stack Codebase",
   "private": true,
   "scripts": {
-    "build:web": "lerna run build --scope={@crystal-ball/common,@crystal-ball/database,@crystal-ball/web}",
+    "build:database": "lerna run build --scope={@crystal-ball/common,@crystal-ball/database}",
     "build:service": "lerna run build --scope={@crystal-ball/common,@crystal-ball/database,@crystal-ball/service}",
+    "build:web": "lerna run build --scope={@crystal-ball/common,@crystal-ball/database,@crystal-ball/web}",
     "precommit": "lint-staged",
     "lint": "tsc --noEmit && eslint --quiet --fix packages/*/src/**/*.{ts,tsx}",
     "postinstall": "if [[ ${NODE_ENV} != \"production\" ]]; then husky install; fi"
@@ -26,6 +27,7 @@
     "eslint": "^7.15.0",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-config-prettier": "^7.0.0",
+    "eslint-import-resolver-lerna": "^2.0.0",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-prettier": "^3.2.0",
     "eslint-plugin-react-hooks": "^4.2.0",

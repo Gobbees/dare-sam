@@ -1,8 +1,9 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Session } from 'next-auth/client';
+import { Source } from '@crystal-ball/common';
 import {
-  FacebookPage,
-  FacebookPost,
+  SocialProfile,
+  Post,
   Session as NextSession,
 } from '@crystal-ball/database';
 import authenticatedRoute from '../../../app/utils/apiRoutes';
@@ -25,15 +26,15 @@ const posts = async (
     return res.status(400).end();
   }
 
-  const facebookPage = await FacebookPage.findOne({
-    where: { id: pageId, owner: userId },
+  const facebookPage = await SocialProfile.findOne({
+    where: { source: Source.Facebook, owner: userId },
   });
   if (!facebookPage) {
     return res.status(404).end();
   }
 
-  const dbPosts = await FacebookPost.find({
-    where: { page: facebookPage.id },
+  const dbPosts = await Post.find({
+    where: { parentProfile: facebookPage.id },
     order: { publishedDate: 'DESC' },
   });
 
@@ -43,11 +44,11 @@ const posts = async (
       id: post.id,
       message: post.message,
       publishedDate: post.publishedDate,
-      postSentiment: post.postSentiment,
+      postSentiment: post.sentiment,
       commentsSentiment: post.commentsOverallSentiment,
       likesCount: post.likeCount,
-      sharesCount: post.sharesCount,
-      commentsCount: post.commentsCount,
+      sharesCount: post.shareCount || 0,
+      commentsCount: post.commentCount,
     }),
   );
   return res.status(200).json(JSON.stringify(facebookPosts));

@@ -1,16 +1,17 @@
 /* eslint-disable no-restricted-syntax */
-import { Sentiment } from '@crystal-ball/database';
+import { Sentiment } from '@crystal-ball/common';
+import { Post } from '@crystal-ball/database';
 
 const recomputePostsOverallSentiment = async (
-  postIds: string[],
-  fetcher: (postId: string) => Promise<Array<Sentiment>>,
-  updater: (postId: string, overallSentiment: number) => Promise<void>,
+  posts: Post[],
+  fetcher: (post: Post) => Promise<Array<Sentiment>>,
+  updater: (post: Post, overallSentiment: number) => Promise<void>,
 ) => {
-  for (const postId of postIds) {
-    const sentiments = await fetcher(postId);
+  for (const post of posts) {
+    const sentiments = await fetcher(post);
     if (sentiments.length) {
       const overallSentimnet = computeSentiment(sentiments);
-      await updater(postId, overallSentimnet);
+      await updater(post, overallSentimnet);
     }
   }
 };
@@ -18,9 +19,9 @@ const recomputePostsOverallSentiment = async (
 const computeSentiment = (sentiments: Array<Sentiment>): number => {
   let sentimentSum = 0;
   sentiments.forEach((sentiment) => {
-    if (sentiment === Sentiment.POSITIVE) {
+    if (sentiment === Sentiment.Positive) {
       sentimentSum += 1;
-    } else if (sentiment === Sentiment.NEGATIVE) {
+    } else if (sentiment === Sentiment.Negative) {
       sentimentSum -= 1;
     }
   });

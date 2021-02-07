@@ -1,23 +1,17 @@
 import Account from './Account';
-import FacebookComment from './FacebookComment';
-import FacebookPage from './FacebookPage';
-import FacebookPost from './FacebookPost';
-import InstagramComment from './InstagramComment';
-import InstagramPost from './InstagramPost';
-import InstagramProfile from './InstagramProfile';
+import Comment from './Comment';
+import Post from './Post';
 import Session from './Sessions';
+import SocialProfile from './SocialProfile';
 import User from './User';
 import VerificationRequests from './VerificationRequests';
 
 export {
   Account,
-  FacebookComment,
-  FacebookPage,
-  FacebookPost,
-  InstagramComment,
-  InstagramPost,
-  InstagramProfile,
+  Comment,
+  Post,
   Session,
+  SocialProfile,
   User,
   VerificationRequests,
 };

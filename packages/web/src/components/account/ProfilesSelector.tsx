@@ -53,7 +53,7 @@ const ProfilesSelector: React.FC<ProfilesSelectorProps> = (
         queryClient.invalidateQueries('user');
       },
       onError: (error: Error) => {
-        console.error(error.message);
+        console.error('Error:', error.message);
       },
     },
   );

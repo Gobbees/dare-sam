@@ -2,7 +2,7 @@
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-await-in-loop */
 import { sendTokenizedRequest, sendPagedRequest } from '@crystal-ball/common';
-import { InstagramPost, InstagramPostComment } from '../types';
+import { InstagramPost, InstagramPostComment } from './types';
 
 const MAX_LIMIT = 100;
 
@@ -25,7 +25,7 @@ const fetchRepliesForComment = async (
         id: reply.id,
         likeCount: reply.like_count,
         message: reply.text,
-        publishedDate: reply.created_time,
+        publishedDate: reply.timestamp,
         repliesCount: 0, // a reply cannot have replies
         replyTo: commentId,
       });
@@ -89,7 +89,7 @@ const fetchInstagramComments = async (comments: any, withReplies: boolean) =>
   fetchComments(comments, withReplies);
 
 /**
- * Fetches the Facebook Posts for the input page.
+ * Fetches the Instagram Posts for the input profile.
  *
  * IMPORTANT: Instagram does not allow fetching posts since a certain date, so the function
  * always fetches every post and then returns only the posts that have a timestamp
@@ -97,20 +97,20 @@ const fetchInstagramComments = async (comments: any, withReplies: boolean) =>
  *
  * **Includes Paging.**
  * @param options
- * - `pageId`: the page id
+ * - `profileId`: the profile id
  * - `token`: the auth token
  * - `fromDate`: returns posts from a certain date
  * - `withComments`: should fetch also the posts comments
  * - `withCommentsReplies`: should fetch also the posts comments replies
  */
 const fetchInstagramProfilePosts = async (options: {
-  pageId: string;
+  profileId: string;
   token: string;
   fromDate: Date;
   withComments?: boolean;
   withCommentsReplies?: boolean;
 }): Promise<InstagramPost[] | undefined> => {
-  let url = `${options.pageId}/media?limit=${MAX_LIMIT}&fields=id,caption,timestamp,media_url,like_count`;
+  let url = `${options.profileId}/media?limit=${MAX_LIMIT}&fields=id,caption,timestamp,media_url,like_count`;
   if (options.withComments) {
     url = url.concat(
       `,comments.limit(${MAX_LIMIT}){id,text,timestamp,like_count${
@@ -120,7 +120,6 @@ const fetchInstagramProfilePosts = async (options: {
       }}`,
     );
   }
-  console.log(url);
   let response = await sendTokenizedRequest(url, true, options.token);
   const posts: InstagramPost[] = [];
 

@@ -21,7 +21,6 @@ interface FacebookPost {
 
 interface FacebookPage {
   id: string;
-  pageAccessToken: string;
   name: string;
   pictureUrl: string;
 }

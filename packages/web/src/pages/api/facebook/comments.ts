@@ -1,8 +1,8 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Session } from 'next-auth/client';
 import {
-  FacebookComment,
-  FacebookPage,
+  Comment,
+  SocialProfile,
   Session as NextSession,
 } from '@crystal-ball/database';
 import { FacebookComment as ClientFBComment } from '../../../types';
@@ -14,7 +14,7 @@ const verifyUserAccess = async (session: Session, postId: string) => {
     where: { accessToken: session.accessToken },
     select: ['userId'],
   });
-  const pageWithPosts = await FacebookPage.findOne({
+  const pageWithPosts = await SocialProfile.findOne({
     where: { owner: userId },
     relations: ['posts'],
   });
@@ -43,14 +43,16 @@ const comments = async (
     return res.status(401).json({ error: error.message });
   }
 
-  const facebookComments = await FacebookComment.findCommentsByPost(postId);
+  const facebookComments = await Comment.findCommentsByPostWithExternalId(
+    postId,
+  );
 
   const apiResponse: ClientFBComment[] = [];
   facebookComments.forEach((comment) =>
     apiResponse.push({
       id: comment.id,
       message: comment.message,
-      sentiment: comment.overallSentiment,
+      sentiment: comment.sentiment,
       likeCount: comment.likeCount,
     }),
   );

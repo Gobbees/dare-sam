@@ -1,10 +1,11 @@
 /* eslint-disable no-restricted-syntax */
 import { TypeOrmManager } from '@crystal-ball/database';
 import serviceConfig from '../serviceConfig';
-import { fetchAllUsers } from './service/fetchers/users';
-import fetchFacebookData from './service/workers/facebook';
-import fetchInstagramData from './service/workers/instagram';
-import sleepFor from './utils';
+import { fetchAllUsers } from './service/fetchers/db';
+import facebookPageWorker from './service/workers/facebook';
+import instagramWorker from './service/workers/instagram';
+import { updateSentiments } from './service/workers/sentiment-analysis';
+import { sleepFor, fetchSinceDays } from './utils';
 
 require('dotenv-flow').config();
 
@@ -31,14 +32,41 @@ const service = async () => {
         developmentMode: process.env.NODE_ENV === 'development',
       });
     }
+    const fetchSince = fetchSinceDays(serviceConfig.fetchSinceDays);
+
     const users = await fetchAllUsers();
-    for (const user of users) {
-      await fetchFacebookData(user, {
-        fetchSinceDays: serviceConfig.fetchSinceDays,
-      });
-      await fetchInstagramData(user, {
-        fetchSinceDays: serviceConfig.fetchSinceDays,
-      });
+    for (const { user, facebookPage, instagramProfile } of users) {
+      if (user.facebookAccessToken) {
+        console.log(`Fetching Facebook Socials for user ${user.id}...`);
+        if (facebookPage) {
+          await facebookPageWorker(
+            facebookPage,
+            user.facebookAccessToken,
+            fetchSince,
+          );
+          if (serviceConfig.computeSentiment) {
+            await updateSentiments(facebookPage, fetchSince);
+          }
+        } else {
+          console.log(`No Facebook page linked to ${user.id}, skipping.`);
+        }
+        if (instagramProfile) {
+          await instagramWorker(
+            instagramProfile,
+            user.facebookAccessToken,
+            fetchSince,
+          );
+          if (serviceConfig.computeSentiment) {
+            await updateSentiments(instagramProfile, fetchSince);
+          }
+        } else {
+          console.log(`No Instagram profile linked to ${user.id}, skipping.`);
+        }
+      } else {
+        console.log(
+          `[WARN] Skipping Facebook Socials for user ${user.id} since no Facebook Access Token was found.`,
+        );
+      }
     }
 
     await TypeOrmManager.maybeCloseConnection();
