@@ -1,7 +1,8 @@
 import * as React from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { Box, Divider, Flex, Spinner, Text } from '@chakra-ui/react';
+import { useMutation } from 'react-query';
+import { Box, Divider, Flex, Spinner, Text, useToast } from '@chakra-ui/react';
 import useUser from '../hooks/UseUser';
 import RedirectingPage from '../components/RedirectingPage';
 import ProfilesConnector from '../components/account/ProfilesConnector';
@@ -27,9 +28,34 @@ const DEFAULT_ACCOUNT_PAGE_STATE: AccountPageState = {
 
 const AccountPage = () => {
   const router = useRouter();
+  const toast = useToast();
   const { user, loading } = useUser();
   const [state, setState] = React.useState<AccountPageState>(
     DEFAULT_ACCOUNT_PAGE_STATE,
+  );
+  const facebookTokenMutation = useMutation(
+    async (token: string) =>
+      fetch('/api/facebook/tokens', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, isLongLived: false }),
+      }),
+    {
+      onMutate: () => {
+        toast({
+          status: 'info',
+          description: 'Updating the Facebook token...',
+          position: 'bottom-right',
+        });
+      },
+      onSuccess: () => {
+        toast({
+          status: 'success',
+          description: 'Updated',
+          position: 'bottom-right',
+        });
+      },
+    },
   );
 
   React.useEffect(() => {
@@ -87,14 +113,15 @@ const AccountPage = () => {
               token: string,
               facebookSelected: boolean,
               instagramSelected: boolean,
-            ) =>
+            ) => {
               setState({
                 ...state,
                 fbAccessToken: token,
                 facebookChecked: facebookSelected,
                 instagramChecked: instagramSelected,
-              })
-            }
+              });
+              facebookTokenMutation.mutate(token);
+            }}
           />
           <Divider py={3} />
           {state.fbAccessToken && (
