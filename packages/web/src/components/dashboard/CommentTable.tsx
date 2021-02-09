@@ -13,13 +13,12 @@ import {
 } from '@chakra-ui/react';
 import { Sentiment } from '@crystal-ball/common';
 import React from 'react';
-import { AiFillFacebook } from 'react-icons/ai';
 import { BiLike } from 'react-icons/bi';
 import { useQuery } from 'react-query';
 import { Column, useTable } from 'react-table';
-import { fetchFacebookCommentsForPost } from '../../app/api/facebook';
-import { FacebookComment } from '../../types';
-import SentimentEmoji from '../SentimentEmoji';
+import fetchCommentsByPost from '../../app/api/comments';
+import { Comment } from '../../types';
+import SentimentEmoji from '../common/SentimentEmoji';
 
 interface CommentTableProps {
   postId: string;
@@ -35,8 +34,8 @@ interface CommentTableColumns {
 const CommentTable: React.FC<CommentTableProps> = (
   props: CommentTableProps,
 ) => {
-  const { data, status } = useQuery<FacebookComment[]>(props.postId, () =>
-    fetchFacebookCommentsForPost(props.postId),
+  const { data, status } = useQuery<Comment[]>(props.postId, () =>
+    fetchCommentsByPost(props.postId),
   );
   const { columns, tableData } = useTableData(data || []);
   const {
@@ -67,7 +66,7 @@ const CommentTable: React.FC<CommentTableProps> = (
     );
   }
   return (
-    <Table w="4xl" {...getTableProps()}>
+    <Table w="full" {...getTableProps()}>
       <Thead>
         {headerGroups.map((headerGroup) => (
           <Tr {...headerGroup.getHeaderGroupProps()}>
@@ -95,7 +94,7 @@ const CommentTable: React.FC<CommentTableProps> = (
   );
 };
 
-const useTableData = (comments: FacebookComment[]) => {
+const useTableData = (comments: Comment[]) => {
   const columns = React.useMemo<Array<Column<CommentTableColumns>>>(
     () => [
       // {
@@ -127,7 +126,8 @@ const useTableData = (comments: FacebookComment[]) => {
         Cell: ({ value }) => (
           <Link href={value}>
             <Flex flexDir="row" align="center" maxW={64}>
-              View on <Icon as={AiFillFacebook} w={8} h={7} color="blue.600" />
+              View <br />
+              comment
             </Flex>
           </Link>
         ),

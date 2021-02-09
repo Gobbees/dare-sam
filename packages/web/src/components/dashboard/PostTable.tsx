@@ -19,7 +19,7 @@ import { IoChevronDown, IoChevronUp } from 'react-icons/io5';
 import { Column, Row, useExpanded, useFilters, useTable } from 'react-table';
 import { Post } from '../../types';
 import SocialLogo from '../common/SocialLogo';
-// import CommentTable from './CommentTable';
+import CommentTable from './CommentTable';
 
 interface PostTableProps {
   posts: Post[];
@@ -106,7 +106,7 @@ const PostTable: React.FC<PostTableProps> = (props: PostTableProps) => {
                       <Flex flexDir="column" align="center">
                         <Text fontWeight="extrabold">Comments</Text>
                         <Flex flexDir="column" align="center">
-                          {/* <CommentTable postId={data[row.index].id} /> */}
+                          <CommentTable postId={tableData[row.index].id} />
                         </Flex>
                       </Flex>
                     </Td>
@@ -142,7 +142,7 @@ const useTableData = (posts: Post[]) => {
         id: 'rowExpander',
         Cell: ({ row }: any) => (
           <>
-            {row.values.commentsCount !== 0 && (
+            {row.values.commentCount !== 0 && (
               <Flex
                 align="center"
                 justify="center"
