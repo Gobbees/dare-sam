@@ -1,11 +1,12 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Session } from 'next-auth/client';
+import { Source } from '@crystal-ball/common';
 import {
   Comment,
   SocialProfile,
   Session as NextSession,
 } from '@crystal-ball/database';
-import { FacebookComment as ClientFBComment } from '../../../types';
+import { Comment as ClientFBComment } from '../../../types';
 import authenticatedRoute from '../../../app/utils/apiRoutes';
 
 // verifies that the user can access the requested resource
@@ -51,6 +52,7 @@ const comments = async (
   facebookComments.forEach((comment) =>
     apiResponse.push({
       id: comment.id,
+      source: Source.Facebook,
       message: comment.message,
       sentiment: comment.sentiment,
       likeCount: comment.likeCount,

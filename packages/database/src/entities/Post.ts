@@ -1,10 +1,13 @@
 import { Sentiment, Source } from '@crystal-ball/common';
 import {
+  Between,
   Column,
   Entity,
   FindConditions,
+  In,
   Index,
   IsNull,
+  LessThanOrEqual,
   ManyToOne,
   MoreThanOrEqual,
   Not,
@@ -179,6 +182,27 @@ export default class Post extends BaseEntityWithMetadata {
         ...getOptionsObject(options),
       },
     });
+
+  static findByParentProfiles = (
+    profileIds: string[],
+    dateInterval: { fromDate?: Date; sinceDate?: Date },
+  ) => {
+    let dateFilter;
+    if (dateInterval.fromDate && dateInterval.sinceDate) {
+      dateFilter = Between(dateInterval.fromDate, dateInterval.sinceDate);
+    } else if (dateInterval.fromDate) {
+      dateFilter = MoreThanOrEqual(dateInterval.fromDate);
+    } else if (dateInterval.sinceDate) {
+      dateFilter = LessThanOrEqual(dateInterval.sinceDate);
+    }
+    return Post.find({
+      where: {
+        parentProfile: In(profileIds),
+        publishedDate: dateFilter,
+      },
+      order: { publishedDate: 'DESC' },
+    });
+  };
 }
 
 const getOptionsObject = (options?: FindOptions) => {

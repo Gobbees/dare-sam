@@ -6,7 +6,7 @@ import {
   Session as NextSession,
   User,
 } from '@crystal-ball/database';
-import { InstagramProfile as ClientIGProfile } from '../../../types';
+import { SocialProfile as ClientIGProfile } from '../../../types';
 import authenticatedRoute from '../../../app/utils/apiRoutes';
 
 const createProfile = async (

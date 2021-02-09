@@ -1,6 +1,7 @@
 import { Box, HStack, StackDivider, Text } from '@chakra-ui/react';
+import { Source } from '@crystal-ball/common';
 import React from 'react';
-import { Social, User } from '../../types';
+import { User } from '../../types';
 import SocialProfile from '../common/SocialProfile';
 
 interface YourProfilesProps {
@@ -16,7 +17,7 @@ const YourProfilesSection: React.FC<YourProfilesProps> = ({
     profiles.push(
       <SocialProfile
         key={page.id}
-        social={Social.Facebook}
+        source={Source.Facebook}
         image={page.picture}
         name={page.name}
       />,
@@ -27,7 +28,7 @@ const YourProfilesSection: React.FC<YourProfilesProps> = ({
     profiles.push(
       <SocialProfile
         key={profile.id}
-        social={Social.Instagram}
+        source={Source.Instagram}
         image={profile.picture}
         name={profile.name}
       />,

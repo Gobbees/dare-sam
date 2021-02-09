@@ -1,7 +1,10 @@
-import { Flex, Spinner, Text } from '@chakra-ui/react';
+import { Box, Flex, Spinner, Text } from '@chakra-ui/react';
+import Head from 'next/head';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import * as React from 'react';
-import PostTable from '../../components/dashboard/PostTable';
+import Navbar from '../../components/common/Navbar';
+import DashboardTable from '../../components/dashboard/DashboardTable';
 import RedirectingPage from '../../components/RedirectingPage';
 import useUser from '../../hooks/UseUser';
 
@@ -14,29 +17,42 @@ const DashboardPage = () => {
       router.replace('/login');
     }
   }, [user, loading, router]);
-  if (loading) {
-    return <Spinner></Spinner>;
-  }
 
-  if (!user) {
-    return <RedirectingPage />;
-  }
-  // TODO explain that the comment count can be different from the actual comments we show because
-  // empty comments are not saved in the system
-  return user.facebookPage ? (
-    <Flex flexDir="column" align="center">
-      <Text fontWeight="extrabold" fontSize="5xl">
-        Posts
-      </Text>
-      <Flex flexDir="column" maxW="7xl" align="center">
-        <PostTable page={user.facebookPage} />
+  let content: React.ReactNode;
+  if (loading) {
+    content = (
+      <Flex flexDir="column" align="center">
+        <Spinner />
       </Flex>
-    </Flex>
-  ) : (
-    <Flex flexDir="column" align="center">
-      Uh oh, you don't have any Facebook Pages. Link them through the account
-      page.
-    </Flex>
+    );
+  } else if (!user) {
+    return <RedirectingPage />;
+  } else if (user.facebookPage || user.instagramProfile) {
+    content = (
+      <Flex flexDir="column" align="center">
+        <Text fontWeight="extrabold" fontSize="5xl">
+          Posts
+        </Text>
+        <DashboardTable user={user} />
+      </Flex>
+    );
+  } else {
+    content = (
+      <Flex flexDir="column" align="center">
+        Uh oh, you don't have any profiles. Link them through the
+        <Link href="/account">account</Link>
+        page.
+      </Flex>
+    );
+  }
+  return (
+    <Box minW="full" minH="screen">
+      <Head>
+        <title>Dashboard | Crystal Ball</title>
+      </Head>
+      <Navbar />
+      <Box pt={24}>{content}</Box>
+    </Box>
   );
 };
 

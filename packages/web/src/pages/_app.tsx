@@ -7,6 +7,8 @@ import { defaultUserValue, UserContext } from '../context/UserContext';
 import theme from '../../theme';
 import { User } from '../types';
 
+import '../styles/react-datepicker.css'; // used only by react-datepicker, but this is the fastest way without changing the component myself
+
 const queryClient = new QueryClient();
 const cbTheme = extendTheme(theme);
 

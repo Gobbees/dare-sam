@@ -1,11 +1,8 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Session } from 'next-auth/client';
+import { Source } from '@crystal-ball/common';
 import { Session as NextSession, User } from '@crystal-ball/database';
-import {
-  FacebookPage,
-  InstagramProfile,
-  User as ClientUser,
-} from '../../types';
+import { SocialProfile, User as ClientUser } from '../../types';
 import authenticatedRoute from '../../app/utils/apiRoutes';
 
 const getUser = async (
@@ -21,15 +18,15 @@ const getUser = async (
   if (!user) {
     return res.status(404).end();
   }
-  const facebookPage: FacebookPage | undefined = user.facebookPage && {
+  const facebookPage: SocialProfile | undefined = user.facebookPage && {
     id: user.facebookPage.id,
+    source: Source.Facebook,
     name: user.facebookPage.name,
     picture: user.facebookPage.picture,
   };
-  const instagramProfile:
-    | InstagramProfile
-    | undefined = user.instagramProfile && {
+  const instagramProfile: SocialProfile | undefined = user.instagramProfile && {
     id: user.instagramProfile.id,
+    source: Source.Instagram,
     name: user.instagramProfile.name,
     picture: user.instagramProfile.picture,
   };

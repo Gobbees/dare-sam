@@ -1,10 +1,10 @@
 import { HStack, Icon, Image, Text, VStack } from '@chakra-ui/react';
+import { Source } from '@crystal-ball/common';
 import React from 'react';
 import { IoLogoFacebook, IoLogoInstagram } from 'react-icons/io5';
-import { Social } from '../../types';
 
 interface SocialProfileProps {
-  social: Social;
+  source: Source;
   image: string;
   name: string;
 }
@@ -23,7 +23,7 @@ const SocialProfile: React.FC<SocialProfileProps> = (
     />
     <HStack spacing={3} align="center">
       <Icon
-        as={props.social === Social.Facebook ? IoLogoFacebook : IoLogoInstagram}
+        as={props.source === Source.Facebook ? IoLogoFacebook : IoLogoInstagram}
         w={6}
         h={6}
       />

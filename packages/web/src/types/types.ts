@@ -1,41 +1,26 @@
-import { Sentiment } from '@crystal-ball/common';
+import { Sentiment, Source } from '@crystal-ball/common';
 
-export interface FacebookComment {
+export interface Comment {
+  id: string;
+  source: Source;
   message?: string;
   likeCount: number;
-  id: string;
   sentiment?: Sentiment;
 }
-
-export interface FacebookPost {
-  publishedDate: Date;
+export interface Post {
+  id: string;
+  source: Source;
   message?: string;
-  likesCount: number;
-  sharesCount: number;
-  commentsCount: number;
-  id: string;
-  postSentiment?: Sentiment;
-  commentsSentiment?: number;
-}
-
-export interface InstagramPost {
   publishedDate: Date;
-  message?: string;
-  likesCount: number;
-  commentsCount: number;
-  id: string;
-  postSentiment?: Sentiment;
-  commentsSentiment?: number;
+  likeCount: number;
+  shareCount?: number;
+  commentCount: number;
+  sentiment?: Sentiment;
+  commentsOverallSentiment?: number;
 }
-
-export interface InstagramProfile {
+export interface SocialProfile {
   id: string;
-  name: string;
-  picture: string;
-}
-
-export interface FacebookPage {
-  id: string;
+  source: Source;
   name: string;
   picture: string;
 }
@@ -44,11 +29,6 @@ export interface User {
   name?: string;
   email?: string;
   image?: string;
-  facebookPage?: FacebookPage;
-  instagramProfile?: InstagramProfile;
-}
-
-export enum Social {
-  Facebook = 'FACEBOOK',
-  Instagram = 'INSTAGRAM',
+  facebookPage?: SocialProfile;
+  instagramProfile?: SocialProfile;
 }

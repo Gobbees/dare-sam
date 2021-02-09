@@ -1,5 +1,5 @@
-import { sendTokenizedRequest } from '@crystal-ball/common';
-import { InstagramProfile, InstagramPost } from '../../../types';
+import { sendTokenizedRequest, Source } from '@crystal-ball/common';
+import { SocialProfile } from '../../../types';
 
 // eslint-disable-next-line import/prefer-default-export
 export const getInstagramProfilesForProfile = async (authToken: string) => {
@@ -11,22 +11,15 @@ export const getInstagramProfilesForProfile = async (authToken: string) => {
   if (!response) {
     return undefined;
   }
-  const profiles: InstagramProfile[] = [];
+  const profiles: SocialProfile[] = [];
   response.data.forEach((profile: any) => {
     const igProfile = profile.connected_instagram_account;
     profiles.push({
       id: igProfile.id,
+      source: Source.Instagram,
       name: igProfile.name,
       picture: igProfile.profile_picture_url,
     });
   });
   return profiles;
-};
-
-export const fetchInstagramPostsForProfile = async (
-  profile: InstagramProfile,
-): Promise<InstagramPost[]> => {
-  const response = await fetch(`/api/instagram/posts?profileId=${profile.id}`);
-  const data = await response.json();
-  return data;
 };

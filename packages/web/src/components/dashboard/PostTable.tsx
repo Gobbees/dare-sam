@@ -3,7 +3,6 @@ import {
   Flex,
   Icon,
   Link,
-  Spinner,
   Table,
   Tbody,
   Td,
@@ -12,36 +11,41 @@ import {
   Thead,
   Tr,
 } from '@chakra-ui/react';
+import { Source } from '@crystal-ball/common';
 import { format } from 'date-fns';
 import * as React from 'react';
-import { AiFillFacebook } from 'react-icons/ai';
 import { BiComment, BiLike, BiShare } from 'react-icons/bi';
 import { IoChevronDown, IoChevronUp } from 'react-icons/io5';
-import { useQuery } from 'react-query';
-import { Column, useExpanded, useTable } from 'react-table';
-import CommentTable from './CommentTable';
-import { fetchFacebookPostsForPage } from '../../app/api/facebook';
-import { FacebookPage, FacebookPost } from '../../types';
+import { Column, Row, useExpanded, useFilters, useTable } from 'react-table';
+import { Post } from '../../types';
+import SocialLogo from '../common/SocialLogo';
+// import CommentTable from './CommentTable';
 
 interface PostTableProps {
-  page: FacebookPage;
+  posts: Post[];
+  facebookSelected: boolean;
+  instagramSelected: boolean;
 }
 
 interface PostTableColumns {
+  id: string;
+  source: Source;
   publishedDate: Date;
   message?: string;
   url: string;
   commentsSentiment?: number;
-  likesCount: number;
-  sharesCount: number;
-  commentsCount: number;
+  likeCount: number;
+  shareCount?: number;
+  commentCount: number;
+}
+
+interface SourceFilter {
+  facebookSelected: boolean;
+  instagramSelected: boolean;
 }
 
 const PostTable: React.FC<PostTableProps> = (props: PostTableProps) => {
-  const { data, status } = useQuery<FacebookPost[]>('facebook-posts', () =>
-    fetchFacebookPostsForPage(props.page),
-  );
-  const { columns, tableData } = useTableData(data || []);
+  const { columns, tableData } = useTableData(props.posts);
 
   const {
     getTableProps,
@@ -49,23 +53,25 @@ const PostTable: React.FC<PostTableProps> = (props: PostTableProps) => {
     getTableBodyProps,
     rows,
     prepareRow,
+    setFilter,
     toggleAllRowsExpanded,
     visibleColumns,
   }: any = useTable(
+    // any because toggleAllRowsExpanded doesn't exist in the basic TableInstance.
     {
       columns,
       data: tableData,
     },
+    useFilters,
     useExpanded,
   );
-  // any because toggleAllRowsExpanded doesn't exist in the basic TableInstance.
 
-  if (status === 'loading') {
-    return <Spinner></Spinner>;
-  }
-  if (!data) {
-    return <>Uh oh, your page doesn't have any post yet</>;
-  }
+  React.useEffect(() => {
+    setFilter('source', {
+      facebookSelected: props.facebookSelected,
+      instagramSelected: props.instagramSelected,
+    } as SourceFilter);
+  }, [props.facebookSelected, props.instagramSelected, setFilter]);
 
   return (
     <>
@@ -100,7 +106,7 @@ const PostTable: React.FC<PostTableProps> = (props: PostTableProps) => {
                       <Flex flexDir="column" align="center">
                         <Text fontWeight="extrabold">Comments</Text>
                         <Flex flexDir="column" align="center">
-                          <CommentTable postId={data[row.index].id} />
+                          {/* <CommentTable postId={data[row.index].id} /> */}
                         </Flex>
                       </Flex>
                     </Td>
@@ -115,7 +121,21 @@ const PostTable: React.FC<PostTableProps> = (props: PostTableProps) => {
   );
 };
 
-const useTableData = (posts: FacebookPost[]) => {
+// Custom source filter
+const sourceFilter = (
+  rows: Array<Row<PostTableColumns>>,
+  id: Array<string>,
+  filterValue: SourceFilter,
+) =>
+  rows.filter(
+    (row) =>
+      (row.original.source === Source.Facebook &&
+        filterValue.facebookSelected) ||
+      (row.original.source === Source.Instagram &&
+        filterValue.instagramSelected),
+  );
+
+const useTableData = (posts: Post[]) => {
   const columns = React.useMemo<Array<Column<PostTableColumns>>>(
     () => [
       {
@@ -135,6 +155,15 @@ const useTableData = (posts: FacebookPost[]) => {
             )}
           </>
         ),
+      },
+      {
+        accessor: 'source',
+        Cell: ({ value }) => (
+          <Flex align="center">
+            <SocialLogo source={value} />
+          </Flex>
+        ),
+        filter: sourceFilter,
       },
       {
         Header: 'Published Date',
@@ -162,7 +191,7 @@ const useTableData = (posts: FacebookPost[]) => {
         Cell: ({ value }) => (
           <Link href={value}>
             <Flex flexDir="row" align="center" maxW={64}>
-              View on <Icon as={AiFillFacebook} w={8} h={7} color="blue.600" />
+              View post
             </Flex>
           </Link>
         ),
@@ -192,7 +221,7 @@ const useTableData = (posts: FacebookPost[]) => {
       },
       {
         Header: 'Like Count',
-        accessor: 'likesCount',
+        accessor: 'likeCount',
         Cell: ({ value }) => (
           <Text display="inline-block">
             <Icon as={BiLike} w={5} h={5} /> {value}
@@ -201,7 +230,7 @@ const useTableData = (posts: FacebookPost[]) => {
       },
       {
         Header: 'Shares Count',
-        accessor: 'sharesCount',
+        accessor: 'shareCount',
         Cell: ({ value }) => (
           <Text display="inline-block">
             <Icon as={BiShare} w={5} h={5} /> {value}
@@ -210,7 +239,7 @@ const useTableData = (posts: FacebookPost[]) => {
       },
       {
         Header: 'Comments Count',
-        accessor: 'commentsCount',
+        accessor: 'commentCount',
         Cell: ({ value }) => (
           <Text display="inline-block">
             <Icon as={BiComment} w={5} h={5} /> {value}
@@ -223,13 +252,8 @@ const useTableData = (posts: FacebookPost[]) => {
   const tableData = React.useMemo<Array<PostTableColumns>>(
     () =>
       posts.map((post) => ({
-        publishedDate: post.publishedDate,
-        message: post.message,
+        ...post,
         url: `https://facebook.com/${post.id}`,
-        likesCount: post.likesCount,
-        sharesCount: post.sharesCount,
-        commentsCount: post.commentsCount,
-        commentsSentiment: post.commentsSentiment,
       })),
     [posts],
   );

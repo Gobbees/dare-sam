@@ -35,6 +35,7 @@ const NavBarContainer = (props: { children: React.ReactNode }) => {
       justify="space-between"
       wrap="wrap"
       pos="fixed"
+      zIndex="sticky"
       w="full"
       p={5}
       bg="white"

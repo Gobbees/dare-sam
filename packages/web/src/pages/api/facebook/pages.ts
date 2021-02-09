@@ -6,7 +6,7 @@ import {
   Session as NextSession,
   User,
 } from '@crystal-ball/database';
-import { FacebookPage as ClientFBPage } from '../../../types';
+import { SocialProfile as ClientFBPage } from '../../../types';
 import authenticatedRoute from '../../../app/utils/apiRoutes';
 
 const createPage = async (

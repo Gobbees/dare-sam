@@ -8,13 +8,13 @@ import RedirectingPage from '../components/RedirectingPage';
 import ProfilesConnector from '../components/account/ProfilesConnector';
 import YourProfilesSection from '../components/account/YourProfiles';
 import ProfilesSelector from '../components/account/ProfilesSelector';
-import { FacebookPage, InstagramProfile } from '../types';
+import { SocialProfile } from '../types';
 import Navbar from '../components/common/Navbar';
 
 interface AccountPageState {
   profilesState?: {
-    facebookPage?: FacebookPage;
-    instagramProfile?: InstagramProfile;
+    facebookPage?: SocialProfile;
+    instagramProfile?: SocialProfile;
   };
   fbAccessToken?: string;
   facebookChecked: boolean;

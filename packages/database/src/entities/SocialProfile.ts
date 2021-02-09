@@ -2,6 +2,7 @@ import { Source } from '@crystal-ball/common';
 import {
   Column,
   Entity,
+  In,
   Index,
   ManyToOne,
   OneToMany,
@@ -71,4 +72,9 @@ export default class SocialProfile extends BaseEntityWithMetadata {
    */
   @OneToMany(() => Post, (post) => post.parentProfile)
   posts!: Post[];
+
+  static findBySourcesAndOwner = (sources: Source[], ownerId: string) =>
+    SocialProfile.find({
+      where: { source: In(sources), owner: { id: ownerId } },
+    });
 }

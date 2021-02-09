@@ -11,9 +11,9 @@ import {
   StackDivider,
 } from '@chakra-ui/react';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
-import { FacebookPage, InstagramProfile } from '../../types';
+import { SocialProfile } from '../../types';
 import { getFacebookPagesForProfile } from '../../app/api/facebook';
-import { getInstagramProfilesForProfile } from '../../app/api/instagram/instagram';
+import { getInstagramProfilesForProfile } from '../../app/api/instagram';
 
 interface ProfilesSelectorProps {
   fbAccessToken: string;
@@ -26,7 +26,7 @@ const ProfilesSelector: React.FC<ProfilesSelectorProps> = (
 ) => {
   const queryClient = useQueryClient();
   const facebookPageMutation = useMutation(
-    async (page: FacebookPage) =>
+    async (page: SocialProfile) =>
       fetch('/api/facebook/pages/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -42,7 +42,7 @@ const ProfilesSelector: React.FC<ProfilesSelectorProps> = (
     },
   );
   const instagramProfileMutation = useMutation(
-    async (profile: InstagramProfile) =>
+    async (profile: SocialProfile) =>
       fetch('/api/instagram/profiles/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -57,12 +57,12 @@ const ProfilesSelector: React.FC<ProfilesSelectorProps> = (
       },
     },
   );
-  const facebookPages = useQuery<FacebookPage[] | undefined>(
+  const facebookPages = useQuery<SocialProfile[] | undefined>(
     'facebook-pages',
     () => getFacebookPagesForProfile(props.fbAccessToken),
     { enabled: props.displayFacebook },
   );
-  const instagramProfiles = useQuery<FacebookPage[] | undefined>(
+  const instagramProfiles = useQuery<SocialProfile[] | undefined>(
     'instagram-profiles',
     () => getInstagramProfilesForProfile(props.fbAccessToken),
     { enabled: props.displayInstagram },

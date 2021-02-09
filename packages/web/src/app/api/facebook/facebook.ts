@@ -1,6 +1,7 @@
-import { sendTokenizedRequest } from '@crystal-ball/common';
-import { FacebookComment, FacebookPage, FacebookPost } from '../../../types';
+import { sendTokenizedRequest, Source } from '@crystal-ball/common';
+import { SocialProfile } from '../../../types';
 
+// eslint-disable-next-line import/prefer-default-export
 export const getFacebookPagesForProfile = async (authToken: string) => {
   const response = await sendTokenizedRequest(
     'me/accounts?fields=id,access_token,name,picture{url}',
@@ -10,29 +11,14 @@ export const getFacebookPagesForProfile = async (authToken: string) => {
   if (!response) {
     return undefined;
   }
-  const pages: FacebookPage[] = [];
+  const pages: SocialProfile[] = [];
   response.data.forEach((page: any) =>
     pages.push({
       id: page.id,
+      source: Source.Facebook,
       name: page.name,
       picture: page.picture.data.url,
     }),
   );
   return pages;
-};
-
-export const fetchFacebookPostsForPage = async (
-  page: FacebookPage,
-): Promise<FacebookPost[]> => {
-  const response = await fetch(`/api/facebook/posts?pageId=${page.id}`);
-  const data = await response.json();
-  return data;
-};
-
-export const fetchFacebookCommentsForPost = async (
-  postId: string,
-): Promise<FacebookComment[]> => {
-  const response = await fetch(`/api/facebook/comments?postId=${postId}`);
-  const data = await response.json();
-  return data as FacebookComment[];
 };
