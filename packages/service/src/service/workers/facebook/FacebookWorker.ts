@@ -42,6 +42,7 @@ const facebookPageWorker = async (
         externalId: post.id,
         source: Source.Facebook,
         publishedDate: post.publishedDate,
+        permalink: post.permalink,
         message: post.message,
         picture: post.picture,
         commentCount: post.commentCount,

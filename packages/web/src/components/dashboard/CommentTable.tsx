@@ -12,8 +12,9 @@ import {
   Tr,
 } from '@chakra-ui/react';
 import { Sentiment } from '@crystal-ball/common';
+import { format } from 'date-fns';
 import React from 'react';
-import { BiLike } from 'react-icons/bi';
+import { BiComment, BiLike } from 'react-icons/bi';
 import { useQuery } from 'react-query';
 import { Column, useTable } from 'react-table';
 import fetchCommentsByPost from '../../app/api/comments';
@@ -25,10 +26,12 @@ interface CommentTableProps {
 }
 
 interface CommentTableColumns {
+  publishedDate: Date;
   message?: string;
-  url: string;
+  permalink?: string;
   likeCount: number;
-  overallSentiment?: Sentiment;
+  repliesCount: number;
+  sentiment?: Sentiment;
 }
 
 const CommentTable: React.FC<CommentTableProps> = (
@@ -37,6 +40,7 @@ const CommentTable: React.FC<CommentTableProps> = (
   const { data, status } = useQuery<Comment[]>(props.postId, () =>
     fetchCommentsByPost(props.postId),
   );
+  console.log(data?.map((comm) => comm.sentiment));
   const { columns, tableData } = useTableData(data || []);
   const {
     getTableProps,
@@ -97,40 +101,40 @@ const CommentTable: React.FC<CommentTableProps> = (
 const useTableData = (comments: Comment[]) => {
   const columns = React.useMemo<Array<Column<CommentTableColumns>>>(
     () => [
-      // {
-      //   id: 'rowExpander',
-      //   Cell: ({ row }: any) => (
-      //     <Flex
-      //       align="center"
-      //       justify="center"
-      //       w={8}
-      //       h={8}
-      //       {...row.getToggleRowExpandedProps()}
-      //     >
-      //       <Icon as={row.isExpanded ? IoChevronUp : IoChevronDown} />
-      //     </Flex>
-      //   ),
-      // },
+      {
+        Header: 'Published Date',
+        accessor: 'publishedDate',
+        Cell: ({ value }) => (
+          <Flex align="center">
+            <Text>{format(new Date(value), 'PPP')}</Text>
+          </Flex>
+        ),
+      },
       {
         Header: 'Message',
         accessor: 'message',
         Cell: ({ value }) => (
-          <Text isTruncated maxW="2xl">
-            {value}
-          </Text>
+          <Flex w="2xl">
+            <Text maxW="2xl">{value}</Text>
+          </Flex>
         ),
       },
       {
         Header: 'Link',
-        accessor: 'url',
-        Cell: ({ value }) => (
-          <Link href={value}>
-            <Flex flexDir="row" align="center" maxW={64}>
-              View <br />
-              comment
-            </Flex>
-          </Link>
-        ),
+        accessor: 'permalink',
+        Cell: ({ value }) => {
+          if (value) {
+            return (
+              <Link href={value} color="blue.400">
+                <Flex flexDir="row" align="center" maxW={64}>
+                  View <br />
+                  comment
+                </Flex>
+              </Link>
+            );
+          }
+          return null;
+        },
       },
       {
         Header: 'Like Count',
@@ -142,14 +146,23 @@ const useTableData = (comments: Comment[]) => {
         ),
       },
       {
+        Header: 'Replies Count',
+        accessor: 'repliesCount',
+        Cell: ({ value }) => (
+          <Text display="inline-block">
+            <Icon as={BiComment} w={5} h={5} /> {value}
+          </Text>
+        ),
+      },
+      {
         Header: 'Sentiment',
-        accessor: 'overallSentiment',
+        accessor: 'sentiment',
         Cell: ({ value }) => (
           <Flex align="center">
-            {value ? (
-              <SentimentEmoji sentiment={value} extraStyles={{ w: 6, h: 6 }} />
-            ) : (
+            {!value && value !== 0 ? (
               <Text>No sentiment detected</Text>
+            ) : (
+              <SentimentEmoji sentiment={value} extraStyles={{ w: 6, h: 6 }} />
             )}
           </Flex>
         ),
@@ -158,13 +171,7 @@ const useTableData = (comments: Comment[]) => {
     [],
   );
   const tableData = React.useMemo<Array<CommentTableColumns>>(
-    () =>
-      comments.map((comment) => ({
-        message: comment.message,
-        url: `https://facebook.com/${comment.id}`,
-        likeCount: comment.likeCount,
-        overallSentiment: comment.sentiment,
-      })),
+    () => comments.map((comment) => ({ ...comment })),
     [comments],
   );
   return { columns, tableData };

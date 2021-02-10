@@ -110,7 +110,7 @@ const fetchInstagramProfilePosts = async (options: {
   withComments?: boolean;
   withCommentsReplies?: boolean;
 }): Promise<InstagramPost[] | undefined> => {
-  let url = `${options.profileId}/media?limit=${MAX_LIMIT}&fields=id,caption,timestamp,media_url,like_count`;
+  let url = `${options.profileId}/media?limit=${MAX_LIMIT}&fields=id,caption,timestamp,permalink,media_url,like_count`;
   if (options.withComments) {
     url = url.concat(
       `,comments.limit(${MAX_LIMIT}){id,text,timestamp,like_count${
@@ -135,6 +135,7 @@ const fetchInstagramProfilePosts = async (options: {
         posts.push({
           id: post.id,
           publishedDate: post.timestamp,
+          permalink: post.permalink,
           message: post.caption,
           picture: post.media_url,
           likeCount: post.like_count,

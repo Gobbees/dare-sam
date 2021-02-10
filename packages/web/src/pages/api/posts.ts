@@ -50,7 +50,7 @@ const posts = async (
       sinceDate: sinceDate ? new Date(sinceDate as string) : undefined,
     },
   );
-  //   console.log(dbPosts);
+
   const returnPosts: ClientPost[] = [];
   dbPosts.forEach((post) =>
     returnPosts.push({
@@ -58,6 +58,7 @@ const posts = async (
       source: post.source,
       message: post.message,
       publishedDate: post.publishedDate,
+      permalink: post.permalink,
       sentiment: post.sentiment,
       commentsOverallSentiment: post.commentsOverallSentiment,
       likeCount: post.likeCount,

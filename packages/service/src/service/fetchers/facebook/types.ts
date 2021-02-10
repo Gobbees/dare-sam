@@ -15,6 +15,7 @@ interface FacebookPost {
   likeCount: number;
   sharesCount: number;
   publishedDate: Date;
+  permalink: string;
   commentCount: number;
   comments?: FacebookPostComment[];
 }

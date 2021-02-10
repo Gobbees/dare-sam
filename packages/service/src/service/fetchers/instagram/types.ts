@@ -14,6 +14,7 @@ interface InstagramPost {
   picture?: string;
   likeCount: number;
   publishedDate: Date;
+  permalink: string;
   commentCount: number;
   comments?: InstagramPostComment[];
 }

@@ -18,6 +18,7 @@ import { BiComment, BiLike, BiShare } from 'react-icons/bi';
 import { IoChevronDown, IoChevronUp } from 'react-icons/io5';
 import { Column, Row, useExpanded, useFilters, useTable } from 'react-table';
 import { Post } from '../../types';
+import SentimentEmoji from '../common/SentimentEmoji';
 import SocialLogo from '../common/SocialLogo';
 import CommentTable from './CommentTable';
 
@@ -25,18 +26,6 @@ interface PostTableProps {
   posts: Post[];
   facebookSelected: boolean;
   instagramSelected: boolean;
-}
-
-interface PostTableColumns {
-  id: string;
-  source: Source;
-  publishedDate: Date;
-  message?: string;
-  url: string;
-  commentsSentiment?: number;
-  likeCount: number;
-  shareCount?: number;
-  commentCount: number;
 }
 
 interface SourceFilter {
@@ -100,7 +89,7 @@ const PostTable: React.FC<PostTableProps> = (props: PostTableProps) => {
                     <Td {...cell.getCellProps()}>{cell.render('Cell')}</Td>
                   ))}
                 </Tr>
-                {row.isExpanded ? (
+                {row.isExpanded && (
                   <Tr>
                     <Td colSpan={visibleColumns.length}>
                       <Flex flexDir="column" align="center">
@@ -111,7 +100,7 @@ const PostTable: React.FC<PostTableProps> = (props: PostTableProps) => {
                       </Flex>
                     </Td>
                   </Tr>
-                ) : null}
+                )}
               </React.Fragment>
             );
           })}
@@ -123,7 +112,7 @@ const PostTable: React.FC<PostTableProps> = (props: PostTableProps) => {
 
 // Custom source filter
 const sourceFilter = (
-  rows: Array<Row<PostTableColumns>>,
+  rows: Array<Row<Post>>,
   id: Array<string>,
   filterValue: SourceFilter,
 ) =>
@@ -136,7 +125,7 @@ const sourceFilter = (
   );
 
 const useTableData = (posts: Post[]) => {
-  const columns = React.useMemo<Array<Column<PostTableColumns>>>(
+  const columns = React.useMemo<Array<Column<Post>>>(
     () => [
       {
         id: 'rowExpander',
@@ -187,9 +176,9 @@ const useTableData = (posts: Post[]) => {
       },
       {
         Header: 'Link',
-        accessor: 'url',
+        accessor: 'permalink',
         Cell: ({ value }) => (
-          <Link href={value}>
+          <Link href={value} color="blue.400">
             <Flex flexDir="row" align="center" maxW={64}>
               View post
             </Flex>
@@ -197,8 +186,21 @@ const useTableData = (posts: Post[]) => {
         ),
       },
       {
+        Header: 'Post Sentiment',
+        accessor: 'sentiment',
+        Cell: ({ value }) => (
+          <Flex align="center">
+            {!value && value !== 0 ? (
+              <Text>No sentiment detected</Text>
+            ) : (
+              <SentimentEmoji sentiment={value} extraStyles={{ w: 6, h: 6 }} />
+            )}
+          </Flex>
+        ),
+      },
+      {
         Header: 'Comments Sentiment',
-        accessor: 'commentsSentiment',
+        accessor: 'commentsOverallSentiment',
         Cell: ({ value }) => {
           let textColor;
           if (!value && value !== 0) {
@@ -213,7 +215,7 @@ const useTableData = (posts: Post[]) => {
           return (
             <Flex flexDir="row" align="center">
               <Text fontWeight="extrabold" color={textColor}>
-                {!value && value !== 0 ? '/' : value}
+                {!value && value !== 0 ? '/' : value.toFixed(2)}
               </Text>
             </Flex>
           );
@@ -249,14 +251,7 @@ const useTableData = (posts: Post[]) => {
     ],
     [],
   );
-  const tableData = React.useMemo<Array<PostTableColumns>>(
-    () =>
-      posts.map((post) => ({
-        ...post,
-        url: `https://facebook.com/${post.id}`,
-      })),
-    [posts],
-  );
+  const tableData = React.useMemo<Array<Post>>(() => posts, [posts]); // table data must be memoized
   return { columns, tableData };
 };
 

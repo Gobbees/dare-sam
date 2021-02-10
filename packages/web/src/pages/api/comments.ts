@@ -5,6 +5,8 @@ import {
   Comment,
   SocialProfile,
   Session as NextSession,
+  Post,
+  User,
 } from '@crystal-ball/database';
 import { Comment as ClientFBComment } from '../../types';
 import authenticatedRoute from '../../app/utils/apiRoutes';
@@ -15,18 +17,33 @@ const verifyUserAccess = async (session: Session, postId: string) => {
     where: { accessToken: session.accessToken },
     select: ['userId'],
   });
-  const pageWithPosts = await SocialProfile.findOne({
-    where: { owner: userId },
-    relations: ['posts'],
-  });
-  if (!pageWithPosts?.posts.map((post) => post.id).includes(postId)) {
+  const { postUserId } = await Post.createQueryBuilder('post')
+    .innerJoin(SocialProfile, 'sp', 'post.parentProfile = sp.id')
+    .innerJoin(User, 'user', 'sp.owner = user.id')
+    .where('post.id = :id', { id: postId })
+    .select('user.id', 'postUserId')
+    .getRawOne();
+  if (postUserId !== userId) {
     return Promise.reject(new Error('Missing user access'));
   }
   return Promise.resolve();
 };
 
 /**
- * @returns an array of FacebookComment
+ * Computes the permalink for a comment.
+ * It currently returns a defined link for Facebook and undefined for Instagram since
+ * the latter doesn't reference a Comment with a specific url.
+ * @param comment the input comment.
+ */
+const computeCommentPermalink = (comment: Comment): string | undefined => {
+  if (comment.source === Source.Facebook) {
+    return `https://facebook.com/${comment.externalId}`;
+  }
+  return undefined;
+};
+
+/**
+ * @returns an array of Comment
  */
 const comments = async (
   req: NextApiRequest,
@@ -50,10 +67,13 @@ const comments = async (
   dbComments.forEach((comment) =>
     apiResponse.push({
       id: comment.id,
-      source: Source.Facebook,
+      source: comment.source,
       message: comment.message,
+      publishedDate: comment.publishedDate,
+      permalink: computeCommentPermalink(comment),
       sentiment: comment.sentiment,
       likeCount: comment.likeCount,
+      repliesCount: comment.repliesCount,
     }),
   );
   return res.status(200).json(JSON.stringify(apiResponse));

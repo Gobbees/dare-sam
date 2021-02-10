@@ -1,6 +1,6 @@
 /* eslint-disable no-restricted-syntax */
 import { Source } from '@crystal-ball/common';
-import { Comment, Post, SocialProfile, User } from '@crystal-ball/database';
+import { Comment, Post, SocialProfile } from '@crystal-ball/database';
 import { fetchInstagramProfilePosts } from '../../fetchers/instagram';
 
 const instagramWorker = async (
@@ -12,7 +12,7 @@ const instagramWorker = async (
 
   const posts = await fetchInstagramProfilePosts({
     profileId: profile.externalId,
-    token: token,
+    token,
     fromDate: fetchSinceDate,
     withComments: true,
     withCommentsReplies: true,
@@ -42,6 +42,7 @@ const instagramWorker = async (
         externalId: post.id,
         source: Source.Instagram,
         publishedDate: post.publishedDate,
+        permalink: post.permalink,
         message: post.message,
         picture: post.picture,
         commentCount: post.commentCount,

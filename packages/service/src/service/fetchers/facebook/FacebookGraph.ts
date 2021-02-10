@@ -136,7 +136,7 @@ export const fetchFacebookPagePosts = async (options: {
 }): Promise<FacebookPost[] | undefined> => {
   let url = `${
     options.pageId
-  }/posts?limit=${MAX_LIMIT}&since=${options.fromDate.toISOString()}&fields=id,created_time,message,picture,likes.summary(true),shares,comments.summary(true)`;
+  }/posts?limit=${MAX_LIMIT}&since=${options.fromDate.toISOString()}&fields=id,created_time,message,picture,permalink_url,likes.summary(true),shares,comments.summary(true)`;
   if (options.withComments) {
     url = url.concat(
       `.order(reverse_chronological){id,message,created_time,likes.summary(true)${
@@ -155,6 +155,7 @@ export const fetchFacebookPagePosts = async (options: {
         publishedDate: post.created_time,
         message: post.message,
         picture: post.picture,
+        permalink: post.permalink_url,
         likeCount: post.likes.summary.total_count,
         sharesCount: post.shares?.count || 0,
         commentCount: post.comments.summary.total_count,

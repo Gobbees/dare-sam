@@ -82,7 +82,7 @@ const updateSentiments = async (page: SocialProfile, fetchPageSince: Date) => {
         return comments.map((comment) => comment.sentiment!); // analyzed only
       },
       async (post: Post, overallSentiment: number) => {
-        await Post.update(post, {
+        await Post.update(post.id, {
           commentsOverallSentiment: overallSentiment,
         });
       },

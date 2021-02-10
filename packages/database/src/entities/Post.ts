@@ -76,6 +76,12 @@ export default class Post extends BaseEntityWithMetadata {
   })
   publishedDate!: Date;
 
+  @Column({
+    name: 'permalink',
+    nullable: true,
+  })
+  permalink!: string;
+
   /**
    * SELF EXPLANATORY
    */
