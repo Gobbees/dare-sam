@@ -56,18 +56,21 @@ const fetchComments = async (comments: any, withReplies: boolean) => {
   const result: FacebookPostComment[] = [];
   while ((response.paging && response.paging.next) || response.data.length) {
     for (const comment of response.data) {
-      const replies =
-        withReplies && comment.comments
-          ? await fetchRepliesForComment(comment.id, comment.comments)
-          : undefined;
-      result.push({
-        id: comment.id,
-        likeCount: comment.likes.summary.total_count,
-        message: comment.message,
-        publishedDate: comment.created_time,
-        repliesCount: comment.comments.summary.total_count,
-        replies,
-      });
+      if (comment.message) {
+        // this allows to have only comments with non empty text
+        const replies =
+          withReplies && comment.comments
+            ? await fetchRepliesForComment(comment.id, comment.comments)
+            : undefined;
+        result.push({
+          id: comment.id,
+          likeCount: comment.likes.summary.total_count,
+          message: comment.message,
+          publishedDate: comment.created_time,
+          repliesCount: replies?.length || 0,
+          replies,
+        });
+      }
     }
     if (response.paging && response.paging.next) {
       response = await sendPagedRequest(response.paging.next);
@@ -136,12 +139,12 @@ export const fetchFacebookPagePosts = async (options: {
 }): Promise<FacebookPost[] | undefined> => {
   let url = `${
     options.pageId
-  }/posts?limit=${MAX_LIMIT}&since=${options.fromDate.toISOString()}&fields=id,created_time,message,picture,permalink_url,likes.summary(true),shares,comments.summary(true)`;
+  }/posts?limit=${MAX_LIMIT}&since=${options.fromDate.toISOString()}&fields=id,created_time,message,picture,permalink_url,likes.summary(true),shares,comments`;
   if (options.withComments) {
     url = url.concat(
       `.order(reverse_chronological){id,message,created_time,likes.summary(true)${
         options.withCommentsReplies
-          ? ',comments.summary(true).order(reverse_chronological){id,message,created_time,likes.summary(true)}'
+          ? ',comments.order(reverse_chronological){id,message,created_time,likes.summary(true)}'
           : ''
       }}`,
     );
@@ -150,6 +153,10 @@ export const fetchFacebookPagePosts = async (options: {
   const posts: FacebookPost[] = [];
   while ((response.paging && response.paging.next) || response.data.length) {
     for (const post of response.data) {
+      const comments = await fetchFacebookComments(
+        post.comments,
+        options.withCommentsReplies || false,
+      );
       posts.push({
         id: post.id,
         publishedDate: post.created_time,
@@ -158,11 +165,8 @@ export const fetchFacebookPagePosts = async (options: {
         permalink: post.permalink_url,
         likeCount: post.likes.summary.total_count,
         sharesCount: post.shares?.count || 0,
-        commentCount: post.comments.summary.total_count,
-        comments: await fetchFacebookComments(
-          post.comments,
-          options.withCommentsReplies || false,
-        ),
+        commentCount: comments.length,
+        comments,
       });
     }
     if (response.paging && response.paging.next) {
