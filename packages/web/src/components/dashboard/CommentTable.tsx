@@ -15,8 +15,9 @@ import { Sentiment } from '@crystal-ball/common';
 import { format } from 'date-fns';
 import React from 'react';
 import { BiComment, BiLike } from 'react-icons/bi';
+import { IoChevronDown, IoChevronUp } from 'react-icons/io5';
 import { useQuery } from 'react-query';
-import { Column, useTable } from 'react-table';
+import { Column, useSortBy, useTable } from 'react-table';
 import fetchCommentsByPost from '../../app/api/comments';
 import { Comment } from '../../types';
 import SentimentEmoji from '../common/SentimentEmoji';
@@ -48,7 +49,8 @@ const CommentTable: React.FC<CommentTableProps> = (
     getTableBodyProps,
     rows,
     prepareRow,
-  } = useTable({ columns, data: tableData });
+  } = useTable({ columns, data: tableData }, useSortBy) as any;
+
   if (status === 'loading') {
     return <Spinner></Spinner>;
   }
@@ -61,32 +63,33 @@ const CommentTable: React.FC<CommentTableProps> = (
     );
   }
   if (data?.length === 0) {
-    return (
-      <>
-        Uh oh, we don't have any comment for this post. This is probably because
-        the comments you received only contain pictures. To verify this, please
-        click on the post link.
-      </>
-    );
+    return <>No comments for this post </>;
   }
   return (
     <Table w="full" {...getTableProps()}>
       <Thead>
-        {headerGroups.map((headerGroup) => (
+        {headerGroups.map((headerGroup: any) => (
           <Tr {...headerGroup.getHeaderGroupProps()}>
-            {headerGroup.headers.map((column) => (
-              <Th {...column.getHeaderProps()}>{column.render('Header')}</Th>
+            {headerGroup.headers.map((column: any) => (
+              <Th {...column.getHeaderProps(column.getSortByToggleProps())}>
+                {column.render('Header')}
+                {column.isSorted && (
+                  <Icon
+                    as={column.isSortedDesc ? IoChevronDown : IoChevronUp}
+                  />
+                )}
+              </Th>
             ))}
           </Tr>
         ))}
       </Thead>
       <Tbody {...getTableBodyProps()}>
-        {rows.map((row) => {
+        {rows.map((row: any) => {
           prepareRow(row);
           return (
             <React.Fragment key={row.id}>
               <Tr {...row.getRowProps()}>
-                {row.cells.map((cell) => (
+                {row.cells.map((cell: any) => (
                   <Td {...cell.getCellProps()}>{cell.render('Cell')}</Td>
                 ))}
               </Tr>
