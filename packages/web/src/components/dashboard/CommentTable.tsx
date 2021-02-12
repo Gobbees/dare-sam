@@ -21,6 +21,7 @@ import { Column, useSortBy, useTable } from 'react-table';
 import fetchCommentsByPost from '../../app/api/comments';
 import { Comment } from '../../types';
 import SentimentEmoji from '../common/SentimentEmoji';
+import TableHeader from '../common/TableHeader';
 
 interface CommentTableProps {
   postId: string;
@@ -105,7 +106,12 @@ const useTableData = (comments: Comment[]) => {
   const columns = React.useMemo<Array<Column<CommentTableColumns>>>(
     () => [
       {
-        Header: 'Published Date',
+        Header: () => (
+          <TableHeader
+            text="Published Date"
+            hintDescription="Date the post has been published"
+          />
+        ),
         accessor: 'publishedDate',
         Cell: ({ value }) => (
           <Flex align="center">
@@ -114,7 +120,7 @@ const useTableData = (comments: Comment[]) => {
         ),
       },
       {
-        Header: 'Message',
+        Header: () => <TableHeader text="Comment Message" />,
         accessor: 'message',
         Cell: ({ value }) => (
           <Flex w="2xl">
@@ -123,7 +129,12 @@ const useTableData = (comments: Comment[]) => {
         ),
       },
       {
-        Header: 'Link',
+        Header: () => (
+          <TableHeader
+            text="Link"
+            hintDescription="Click the corresponding link to view the comment on its social network"
+          />
+        ),
         accessor: 'permalink',
         Cell: ({ value }) => {
           if (value) {
@@ -140,7 +151,7 @@ const useTableData = (comments: Comment[]) => {
         },
       },
       {
-        Header: 'Like Count',
+        Header: () => <TableHeader text="Like Count" />,
         accessor: 'likeCount',
         Cell: ({ value }) => (
           <Text display="inline-block">
@@ -149,7 +160,7 @@ const useTableData = (comments: Comment[]) => {
         ),
       },
       {
-        Header: 'Replies Count',
+        Header: () => <TableHeader text="Replies Count" />,
         accessor: 'repliesCount',
         Cell: ({ value }) => (
           <Text display="inline-block">
@@ -158,7 +169,12 @@ const useTableData = (comments: Comment[]) => {
         ),
       },
       {
-        Header: 'Sentiment',
+        Header: () => (
+          <TableHeader
+            text="Sentiment"
+            hintDescription="The detected sentiment in the comment's message"
+          />
+        ),
         accessor: 'sentiment',
         Cell: ({ value }) => (
           <Flex align="center">

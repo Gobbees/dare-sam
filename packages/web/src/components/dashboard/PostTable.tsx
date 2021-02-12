@@ -20,6 +20,7 @@ import { Column, Row, useExpanded, useFilters, useTable } from 'react-table';
 import { Post } from '../../types';
 import SentimentEmoji from '../common/SentimentEmoji';
 import SocialLogo from '../common/SocialLogo';
+import TableHeader from '../common/TableHeader';
 import CommentTable from './CommentTable';
 
 interface PostTableProps {
@@ -155,7 +156,12 @@ const useTableData = (posts: Post[]) => {
         filter: sourceFilter,
       },
       {
-        Header: 'Published Date',
+        Header: () => (
+          <TableHeader
+            text="Published Date"
+            hintDescription="Date the post has been published"
+          />
+        ),
         accessor: 'publishedDate',
         Cell: ({ value }) => (
           <Flex align="center">
@@ -164,7 +170,7 @@ const useTableData = (posts: Post[]) => {
         ),
       },
       {
-        Header: 'Message',
+        Header: () => <TableHeader text="Post message" />,
         accessor: 'message',
         Cell: ({ value }) => (
           <Flex w={64}>
@@ -175,10 +181,15 @@ const useTableData = (posts: Post[]) => {
         ),
       },
       {
-        Header: 'Link',
+        Header: () => (
+          <TableHeader
+            text="Link"
+            hintDescription="Click the corresponding link to view the post on its social network"
+          />
+        ),
         accessor: 'permalink',
         Cell: ({ value }) => (
-          <Link href={value} color="blue.400">
+          <Link href={value} color="blue.400" target="_blank">
             <Flex flexDir="row" align="center" maxW={64}>
               View post
             </Flex>
@@ -186,7 +197,12 @@ const useTableData = (posts: Post[]) => {
         ),
       },
       {
-        Header: 'Post Sentiment',
+        Header: () => (
+          <TableHeader
+            text="Post Sentiment"
+            hintDescription="The detected sentiment in the post's message"
+          />
+        ),
         accessor: 'sentiment',
         Cell: ({ value }) => (
           <Flex align="center">
@@ -199,7 +215,12 @@ const useTableData = (posts: Post[]) => {
         ),
       },
       {
-        Header: 'Comments Sentiment',
+        Header: () => (
+          <TableHeader
+            text="Comments Sentiment"
+            hintDescription="An aggregate average of the detected sentiments in the posts comments."
+          />
+        ),
         accessor: 'commentsOverallSentiment',
         Cell: ({ value }) => {
           let textColor;
@@ -222,7 +243,7 @@ const useTableData = (posts: Post[]) => {
         },
       },
       {
-        Header: 'Like Count',
+        Header: () => <TableHeader text="Like Count" />,
         accessor: 'likeCount',
         Cell: ({ value }) => (
           <Text display="inline-block">
@@ -231,7 +252,7 @@ const useTableData = (posts: Post[]) => {
         ),
       },
       {
-        Header: 'Shares Count',
+        Header: () => <TableHeader text="Shares Count" />,
         accessor: 'shareCount',
         Cell: ({ value }) => (
           <Text display="inline-block">
@@ -240,7 +261,7 @@ const useTableData = (posts: Post[]) => {
         ),
       },
       {
-        Header: 'Comments Count',
+        Header: () => <TableHeader text="Comments Count" />,
         accessor: 'commentCount',
         Cell: ({ value }) => (
           <Text display="inline-block">
