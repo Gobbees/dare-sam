@@ -62,6 +62,7 @@ const posts = async (
       sentiment: post.sentiment,
       commentsOverallSentiment: post.commentsOverallSentiment,
       likeCount: post.likeCount,
+      shareCount: post.shareCount,
       commentCount: post.commentCount,
     }),
   );
