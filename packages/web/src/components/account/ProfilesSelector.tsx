@@ -10,6 +10,7 @@ import {
   HStack,
   StackDivider,
   Link,
+  useToast,
 } from '@chakra-ui/react';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { SocialProfile } from '../../types';
@@ -25,36 +26,57 @@ interface ProfilesSelectorProps {
 const ProfilesSelector: React.FC<ProfilesSelectorProps> = (
   props: ProfilesSelectorProps,
 ) => {
+  const toast = useToast();
   const queryClient = useQueryClient();
   const facebookPageMutation = useMutation(
-    async (page: SocialProfile) =>
-      fetch('/api/facebook/pages/', {
+    async (page: SocialProfile) => {
+      const response = await fetch('/api/facebook/pages/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ page }),
-      }),
+      });
+      if (response.status >= 400) {
+        const data = await response.json();
+        return Promise.reject(new Error(data.error));
+      }
+      return Promise.resolve();
+    },
     {
       onSuccess: () => {
         queryClient.invalidateQueries('user');
       },
       onError: (error: Error) => {
-        console.error(error.message);
+        toast({
+          status: 'error',
+          description: error.message,
+          isClosable: true,
+        });
       },
     },
   );
   const instagramProfileMutation = useMutation(
-    async (profile: SocialProfile) =>
-      fetch('/api/instagram/profiles/', {
+    async (profile: SocialProfile) => {
+      const response = await fetch('/api/instagram/profiles/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ profile }),
-      }),
+      });
+      if (response.status >= 400) {
+        const data = await response.json();
+        return Promise.reject(new Error(data.error));
+      }
+      return Promise.resolve();
+    },
     {
       onSuccess: () => {
         queryClient.invalidateQueries('user');
       },
       onError: (error: Error) => {
-        console.error('Error:', error.message);
+        toast({
+          status: 'error',
+          description: error.message,
+          isClosable: true,
+        });
       },
     },
   );

@@ -29,7 +29,7 @@ const createProfile = async (
       );
       return res.status(400).json({
         error:
-          "The Instagram Profile you're trying to add is already present. Please try with another one.",
+          "The Instagram Profile you're trying to add is already present in our systems. Please try with another one.",
       });
     }
     const createdProfile = await SocialProfile.insert({

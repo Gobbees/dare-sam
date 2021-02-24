@@ -19,6 +19,7 @@
     "firebase": "^8.2.2",
     "formik": "^2.2.6",
     "framer-motion": "^3.2.0",
+    "lottie-react-web": "^2.2.2",
     "next": "^10.0.4",
     "next-auth": "^3.1.0",
     "react": "^17.0.1",

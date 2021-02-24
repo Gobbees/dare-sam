@@ -1,12 +1,14 @@
-import { Box, Flex, Spinner, Text } from '@chakra-ui/react';
+import { Box, Flex, Link, Spinner, Text, VStack } from '@chakra-ui/react';
+import Lottie from 'lottie-react-web';
 import Head from 'next/head';
-import Link from 'next/link';
+import NextLink from 'next/link';
 import { useRouter } from 'next/router';
 import * as React from 'react';
 import Navbar from '../../components/common/Navbar';
 import DashboardTable from '../../components/dashboard/DashboardTable';
 import RedirectingPage from '../../components/RedirectingPage';
 import useUser from '../../hooks/UseUser';
+import emptyBoxAnimation from '../../../public/animations/sad-empty-box.json';
 
 const DashboardPage = () => {
   const router = useRouter(); // TODO extract this in something like withAuth(Component)
@@ -38,11 +40,23 @@ const DashboardPage = () => {
     );
   } else {
     content = (
-      <Flex flexDir="column" align="center">
-        Uh oh, you don't have any profiles. Link them through the
-        <Link href="/account">account</Link>
-        page.
-      </Flex>
+      <VStack spacing={4} align="center">
+        <Lottie
+          options={{ animationData: emptyBoxAnimation }}
+          title="Sad empty box"
+          width={200}
+          height={200}
+        />
+        <Text textAlign="center">
+          Uh oh, you don't have any profiles. Link them through the{' '}
+          <NextLink href="/account">
+            <Link fontWeight="bold" color="purple.600">
+              Account
+            </Link>
+          </NextLink>{' '}
+          page.
+        </Text>
+      </VStack>
     );
   }
   return (

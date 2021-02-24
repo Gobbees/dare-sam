@@ -1,11 +1,13 @@
-import { Flex } from '@chakra-ui/react';
+import { Flex, Link, Text, VStack } from '@chakra-ui/react';
 import { subDays } from 'date-fns';
+import Lottie from 'lottie-react-web';
 import * as React from 'react';
 import fetchPosts from '../../app/api/posts';
 import { Post, User } from '../../types';
 import PostTable from './PostTable';
 import IntervalSelector from './IntervalSelector';
 import SocialSelector from './SocialSelector';
+import workingAnimation from '../../../public/animations/working.json';
 
 interface DashboardTableProps {
   user: User;
@@ -85,7 +87,29 @@ const DashboardTable: React.FC<DashboardTableProps> = ({
           }
         />
       </Flex>
-      <PostTable posts={posts} {...state.sourcesStatus} />
+      {posts.length ? (
+        <PostTable posts={posts} {...state.sourcesStatus} />
+      ) : (
+        <VStack spacing={4} align="center">
+          <Lottie
+            options={{ animationData: workingAnimation }}
+            title="Sad empty box"
+            width={200}
+            height={200}
+          />
+          <Text textAlign="center" fontSize="lg">
+            Uh oh, the social profiles you linked don't seem to have any posts.
+            This can be our problem, though. <br />
+            In fact, we update your amazing posts once every hour, so it is
+            possible that this is our fault. <br />
+            Please wait some more time or, if you believe this is an error,
+            contact us at{' '}
+            <Link href="mailto:gobbees@gmail.com" color="purple.600">
+              gobbees@gmail.com
+            </Link>
+          </Text>
+        </VStack>
+      )}
     </Flex>
   );
 };

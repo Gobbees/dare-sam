@@ -30,7 +30,7 @@ const createPage = async (
       );
       return res.status(400).json({
         error:
-          "The Facebook Page you're trying to add is already present. Please try with another one.",
+          "The Facebook Page you're trying to add is already present in our systems. Please try with another one.",
       });
     }
     const createdPage = await SocialProfile.insert({

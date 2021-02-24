@@ -1,8 +1,19 @@
 import * as React from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
+import { signout } from 'next-auth/client';
 import { useMutation } from 'react-query';
-import { Box, Divider, Flex, Spinner, Text, useToast } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  Divider,
+  Flex,
+  HStack,
+  Link,
+  Spinner,
+  Text,
+  useToast,
+} from '@chakra-ui/react';
 import useUser from '../hooks/UseUser';
 import RedirectingPage from '../components/RedirectingPage';
 import ProfilesConnector from '../components/account/ProfilesConnector';
@@ -123,7 +134,6 @@ const AccountPage = () => {
               facebookTokenMutation.mutate(token);
             }}
           />
-          <Divider py={3} />
           {state.fbAccessToken && (
             <ProfilesSelector
               fbAccessToken={state.fbAccessToken}
@@ -135,6 +145,15 @@ const AccountPage = () => {
               }
             />
           )}
+          <Divider my={3} />
+          <HStack spacing={3}>
+            <Button onClick={() => signout({ callbackUrl: '/login' })}>
+              Logout
+            </Button>
+            <Link href="mailto:gobbees@gmail.com" color="gray.600">
+              Contact us ✉️
+            </Link>
+          </HStack>
         </Flex>
       </Box>
     </Box>
