@@ -8,7 +8,7 @@ export const getFacebookPagesForProfile = async (authToken: string) => {
     true,
     authToken,
   );
-  if (!response) {
+  if (!response || !response.data) {
     return undefined;
   }
   const pages: SocialProfile[] = [];

@@ -9,6 +9,7 @@ import {
   Button,
   HStack,
   StackDivider,
+  Link,
 } from '@chakra-ui/react';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { SocialProfile } from '../../types';
@@ -69,134 +70,163 @@ const ProfilesSelector: React.FC<ProfilesSelectorProps> = (
   );
   return (
     <VStack spacing={4} alignItems={{ base: 'center', lg: 'start' }} pt={5}>
-      {props.displayFacebook && facebookPages.data && (
+      {props.displayFacebook && (
         <>
           <Text fontWeight="bold" fontSize="xl">
             Your Facebook Pages
           </Text>
-          <Text color="gray.400" fontSize="md">
-            At the moment we only support one Facebook page per account. Please
-            select the page that you want to be analyzed.
-          </Text>
-          <Formik
-            initialValues={{
-              selectedFBPage: facebookPages.data[0].id,
-            }}
-            onSubmit={(values) => {
-              const page = facebookPages.data!.find(
-                (fbPage) => fbPage.id === values.selectedFBPage,
-              );
-              facebookPageMutation.mutate(page!);
-            }}
-          >
-            {({ values, handleSubmit }) => (
-              <Form onSubmit={handleSubmit}>
-                <VStack spacing={5} align="start">
-                  <RadioGroup value={values.selectedFBPage}>
-                    <HStack
-                      spacing={5}
-                      divider={<StackDivider orientation="vertical" />}
-                      align="center"
-                    >
-                      {facebookPages.data!.map((page) => (
-                        <Field
-                          type="radio"
-                          name="selectedFBPage"
-                          value={page.id}
-                          key={page.id}
+          {facebookPages.data ? (
+            <>
+              <Text color="gray.400" fontSize="md">
+                At the moment we only support one Facebook page per account.
+                Please select the page that you want to be analyzed.
+              </Text>
+              <Formik
+                initialValues={{
+                  selectedFBPage: facebookPages.data[0].id,
+                }}
+                onSubmit={(values) => {
+                  const page = facebookPages.data!.find(
+                    (fbPage) => fbPage.id === values.selectedFBPage,
+                  );
+                  facebookPageMutation.mutate(page!);
+                }}
+              >
+                {({ values, handleSubmit }) => (
+                  <Form onSubmit={handleSubmit}>
+                    <VStack spacing={5} align="start">
+                      <RadioGroup value={values.selectedFBPage}>
+                        <HStack
+                          spacing={5}
+                          divider={<StackDivider orientation="vertical" />}
+                          align="center"
                         >
-                          {({ field }: FieldProps) => (
-                            <HStack spacing={3} align="center">
-                              <Radio {...field} />
-                              <VStack spacing={2} align="center">
-                                <Text>{page.name}</Text>
-                                <Image
-                                  src={page.picture}
-                                  w={16}
-                                  h={16}
-                                  borderRadius="full"
-                                  borderWidth="3px"
-                                  borderStyle="solid"
-                                />
-                              </VStack>
-                            </HStack>
-                          )}
-                        </Field>
-                      ))}
-                    </HStack>
-                  </RadioGroup>
-                  <Button type="submit" colorScheme="facebook" shadow="lg">
-                    Save your page
-                  </Button>
-                </VStack>
-              </Form>
-            )}
-          </Formik>
+                          {facebookPages.data!.map((page) => (
+                            <Field
+                              type="radio"
+                              name="selectedFBPage"
+                              value={page.id}
+                              key={page.id}
+                            >
+                              {({ field }: FieldProps) => (
+                                <HStack spacing={3} align="center">
+                                  <Radio {...field} />
+                                  <VStack spacing={2} align="center">
+                                    <Text>{page.name}</Text>
+                                    <Image
+                                      src={page.picture}
+                                      w={16}
+                                      h={16}
+                                      borderRadius="full"
+                                      borderWidth="3px"
+                                      borderStyle="solid"
+                                    />
+                                  </VStack>
+                                </HStack>
+                              )}
+                            </Field>
+                          ))}
+                        </HStack>
+                      </RadioGroup>
+                      <Button type="submit" colorScheme="facebook" shadow="lg">
+                        Save your page
+                      </Button>
+                    </VStack>
+                  </Form>
+                )}
+              </Formik>
+            </>
+          ) : (
+            <Text>
+              It seems that you don't have any Facebook page linked to your
+              profile. <br />
+              If you believe this is an error and want to help to solve it,
+              please send an email to{' '}
+              <Link href="mailto:gobbees@gmail.com" color="blue.400">
+                gobbees@gmail.com
+              </Link>
+            </Text>
+          )}
         </>
       )}
-      {props.displayInstagram && instagramProfiles.data && (
+      {props.displayInstagram && (
         <>
           <Text fontWeight="bold" fontSize="xl">
             Your Instagram Profiles
           </Text>
-          <Text color="gray.400" fontSize="md">
-            At the moment we only support one Instagram profile per account.
-            Please select the profile that you want to be analyzed.
-          </Text>
-          <Formik
-            initialValues={{
-              selectedInstagramProfile: instagramProfiles.data[0].id,
-            }}
-            onSubmit={async (values) => {
-              const profile = instagramProfiles.data!.find(
-                (igProfile) => igProfile.id === values.selectedInstagramProfile,
-              );
-              instagramProfileMutation.mutate(profile!);
-            }}
-          >
-            {({ values, handleSubmit }) => (
-              <Form onSubmit={handleSubmit}>
-                <VStack spacing={5} align="start">
-                  <RadioGroup value={values.selectedInstagramProfile}>
-                    <HStack
-                      spacing={5}
-                      divider={<StackDivider orientation="vertical" />}
-                      align="center"
-                    >
-                      {instagramProfiles.data!.map((page) => (
-                        <Field
-                          type="radio"
-                          name="selectedInstagramProfile"
-                          value={page.id}
-                          key={page.id}
+          {instagramProfiles.data ? (
+            <>
+              <Text color="gray.400" fontSize="md">
+                At the moment we only support one Instagram profile per account.
+                Please select the profile that you want to be analyzed.
+              </Text>
+              <Formik
+                initialValues={{
+                  selectedInstagramProfile: instagramProfiles.data[0].id,
+                }}
+                onSubmit={async (values) => {
+                  const profile = instagramProfiles.data!.find(
+                    (igProfile) =>
+                      igProfile.id === values.selectedInstagramProfile,
+                  );
+                  instagramProfileMutation.mutate(profile!);
+                }}
+              >
+                {({ values, handleSubmit }) => (
+                  <Form onSubmit={handleSubmit}>
+                    <VStack spacing={5} align="start">
+                      <RadioGroup value={values.selectedInstagramProfile}>
+                        <HStack
+                          spacing={5}
+                          divider={<StackDivider orientation="vertical" />}
+                          align="center"
                         >
-                          {({ field }: FieldProps) => (
-                            <HStack spacing={3} align="center">
-                              <Radio {...field} />
-                              <VStack spacing={2} align="center">
-                                <Text>{page.name}</Text>
-                                <Image
-                                  src={page.picture}
-                                  w={16}
-                                  h={16}
-                                  borderRadius="full"
-                                  borderWidth="3px"
-                                  borderStyle="solid"
-                                />
-                              </VStack>
-                            </HStack>
-                          )}
-                        </Field>
-                      ))}
-                    </HStack>
-                  </RadioGroup>
-                  <Button type="submit" colorScheme="instagram" shadow="lg">
-                    Save your profile
-                  </Button>
-                </VStack>
-              </Form>
-            )}
-          </Formik>
+                          {instagramProfiles.data!.map((page) => (
+                            <Field
+                              type="radio"
+                              name="selectedInstagramProfile"
+                              value={page.id}
+                              key={page.id}
+                            >
+                              {({ field }: FieldProps) => (
+                                <HStack spacing={3} align="center">
+                                  <Radio {...field} />
+                                  <VStack spacing={2} align="center">
+                                    <Text>{page.name}</Text>
+                                    <Image
+                                      src={page.picture}
+                                      w={16}
+                                      h={16}
+                                      borderRadius="full"
+                                      borderWidth="3px"
+                                      borderStyle="solid"
+                                    />
+                                  </VStack>
+                                </HStack>
+                              )}
+                            </Field>
+                          ))}
+                        </HStack>
+                      </RadioGroup>
+                      <Button type="submit" colorScheme="instagram" shadow="lg">
+                        Save your profile
+                      </Button>
+                    </VStack>
+                  </Form>
+                )}
+              </Formik>
+            </>
+          ) : (
+            <Text>
+              It seems that you don't have any Instagram profile linked to your
+              profile. <br />
+              If you believe this is an error and want to help to solve it,
+              please send an email to{' '}
+              <Link href="mailto:gobbees@gmail.com" color="blue.400">
+                gobbees@gmail.com
+              </Link>
+            </Text>
+          )}
         </>
       )}
     </VStack>
