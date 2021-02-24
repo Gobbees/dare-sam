@@ -46,8 +46,13 @@ const getFacebookAccessToken = async (instagramAccess: boolean) => {
     facebookProvider.addScope('instagram_basic');
   }
 
-  const result = await firebase.auth().signInWithPopup(facebookProvider);
-  return (result.credential as firebase.auth.OAuthCredential).accessToken;
+  try {
+    const result = await firebase.auth().signInWithPopup(facebookProvider);
+    return (result.credential as firebase.auth.OAuthCredential).accessToken;
+  } catch (error) {
+    console.error(`Error: ${JSON.stringify(error)}`);
+    return Promise.reject(error);
+  }
 };
 
 export { getFacebookAccessToken, getFacebookLongLivedToken };

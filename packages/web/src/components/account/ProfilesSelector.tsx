@@ -97,7 +97,7 @@ const ProfilesSelector: React.FC<ProfilesSelectorProps> = (
           <Text fontWeight="bold" fontSize="xl">
             Your Facebook Pages
           </Text>
-          {facebookPages.data ? (
+          {facebookPages.data && facebookPages.data.length ? (
             <>
               <Text color="gray.400" fontSize="md">
                 At the moment we only support one Facebook page per account.
@@ -162,6 +162,9 @@ const ProfilesSelector: React.FC<ProfilesSelectorProps> = (
             <Text>
               It seems that you don't have any Facebook page linked to your
               profile. <br />
+              Be sure to select the pages that you want to analyze from the
+              Facebook form.
+              <br />
               If you believe this is an error and want to help to solve it,
               please send an email to{' '}
               <Link href="mailto:gobbees@gmail.com" color="blue.400">
@@ -176,7 +179,7 @@ const ProfilesSelector: React.FC<ProfilesSelectorProps> = (
           <Text fontWeight="bold" fontSize="xl">
             Your Instagram Profiles
           </Text>
-          {instagramProfiles.data ? (
+          {instagramProfiles.data && instagramProfiles.data.length ? (
             <>
               <Text color="gray.400" fontSize="md">
                 At the moment we only support one Instagram profile per account.
@@ -242,6 +245,9 @@ const ProfilesSelector: React.FC<ProfilesSelectorProps> = (
             <Text>
               It seems that you don't have any Instagram profile linked to your
               profile. <br />
+              Be sure to select the pages that you want to analyze from the
+              Facebook form.
+              <br />
               If you believe this is an error and want to help to solve it,
               please send an email to{' '}
               <Link href="mailto:gobbees@gmail.com" color="blue.400">
