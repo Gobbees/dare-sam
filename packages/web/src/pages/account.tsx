@@ -88,11 +88,71 @@ const AccountPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, setState]);
 
+  let content: React.ReactNode;
   if (loading) {
-    return <Spinner></Spinner>;
-  }
-  if (!user) {
+    content = (
+      <Flex flexDir="column" align="center">
+        <Spinner />
+      </Flex>
+    );
+  } else if (!user) {
     return <RedirectingPage />;
+  } else {
+    content = (
+      <Flex
+        flexDir="column"
+        px={{ base: 10, lg: 60 }}
+        py={10}
+        alignItems={{ base: 'center', lg: 'start' }}
+      >
+        <Divider py={3} />
+        <Text fontSize="2xl" fontWeight="bold">
+          Your Linked Social Netork profiles
+        </Text>
+        <YourProfilesSection user={user} />
+        <Divider py={3} />
+        <Text fontSize="2xl" fontWeight="bold">
+          Connect your Social Network profiles
+        </Text>
+        <ProfilesConnector
+          facebookEnabled={!state.profilesState?.facebookPage}
+          instagramEnabled={!state.profilesState?.instagramProfile}
+          onFacebookConnected={(
+            token: string,
+            facebookSelected: boolean,
+            instagramSelected: boolean,
+          ) => {
+            setState({
+              ...state,
+              fbAccessToken: token,
+              facebookChecked: facebookSelected,
+              instagramChecked: instagramSelected,
+            });
+            facebookTokenMutation.mutate(token);
+          }}
+        />
+        {state.fbAccessToken && (
+          <ProfilesSelector
+            fbAccessToken={state.fbAccessToken}
+            displayFacebook={
+              state.facebookChecked && !state.profilesState?.facebookPage
+            }
+            displayInstagram={
+              state.instagramChecked && !state.profilesState?.instagramProfile
+            }
+          />
+        )}
+        <Divider my={3} />
+        <HStack spacing={3}>
+          <Button onClick={() => signout({ callbackUrl: '/login' })}>
+            Logout
+          </Button>
+          <Link href="mailto:gobbees@gmail.com" color="gray.600">
+            Contact us ✉️
+          </Link>
+        </HStack>
+      </Flex>
+    );
   }
 
   return (
@@ -101,61 +161,7 @@ const AccountPage = () => {
         <title>Account | Crystal Ball</title>
       </Head>
       <Navbar />
-      <Box pt={24}>
-        <Flex
-          flexDir="column"
-          px={{ base: 10, lg: 60 }}
-          py={10}
-          alignItems={{ base: 'center', lg: 'start' }}
-        >
-          <Divider py={3} />
-          <Text fontSize="2xl" fontWeight="bold">
-            Your Linked Social Netork profiles
-          </Text>
-          <YourProfilesSection user={user} />
-          <Divider py={3} />
-          <Text fontSize="2xl" fontWeight="bold">
-            Connect your Social Network profiles
-          </Text>
-          <ProfilesConnector
-            facebookEnabled={!state.profilesState?.facebookPage}
-            instagramEnabled={!state.profilesState?.instagramProfile}
-            onFacebookConnected={(
-              token: string,
-              facebookSelected: boolean,
-              instagramSelected: boolean,
-            ) => {
-              setState({
-                ...state,
-                fbAccessToken: token,
-                facebookChecked: facebookSelected,
-                instagramChecked: instagramSelected,
-              });
-              facebookTokenMutation.mutate(token);
-            }}
-          />
-          {state.fbAccessToken && (
-            <ProfilesSelector
-              fbAccessToken={state.fbAccessToken}
-              displayFacebook={
-                state.facebookChecked && !state.profilesState?.facebookPage
-              }
-              displayInstagram={
-                state.instagramChecked && !state.profilesState?.instagramProfile
-              }
-            />
-          )}
-          <Divider my={3} />
-          <HStack spacing={3}>
-            <Button onClick={() => signout({ callbackUrl: '/login' })}>
-              Logout
-            </Button>
-            <Link href="mailto:gobbees@gmail.com" color="gray.600">
-              Contact us ✉️
-            </Link>
-          </HStack>
-        </Flex>
-      </Box>
+      <Box pt={24}>{content}</Box>
     </Box>
   );
 };

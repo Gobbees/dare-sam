@@ -1,13 +1,12 @@
-import { Flex, Link, Text, VStack } from '@chakra-ui/react';
+import { Flex, Link, Spinner, Text } from '@chakra-ui/react';
 import { subDays } from 'date-fns';
-import Lottie from 'lottie-react-web';
 import * as React from 'react';
+import ReactDOM from 'react-dom';
 import fetchPosts from '../../app/api/posts';
 import { Post, User } from '../../types';
 import PostTable from './PostTable';
 import IntervalSelector from './IntervalSelector';
 import SocialSelector from './SocialSelector';
-import workingAnimation from '../../../public/animations/working.json';
 
 interface DashboardTableProps {
   user: User;
@@ -36,15 +35,20 @@ const DashboardTable: React.FC<DashboardTableProps> = ({
   };
   const [state, setState] = React.useState<DashboardTableState>(defultState);
   const [posts, setPosts] = React.useState<Post[]>([]);
+  const [postLoading, setPostLoading] = React.useState<boolean>(true);
 
   React.useEffect(() => {
+    setPostLoading(true);
     fetchPosts({
       isFacebookSelected: state.sourcesStatus.facebookSelected,
       isInstagramSelected: state.sourcesStatus.instagramSelected,
       fromDate: state.fromDate,
       sinceDate: state.sinceDate,
     }).then((newPosts) => {
-      setPosts(newPosts);
+      ReactDOM.unstable_batchedUpdates(() => {
+        setPosts(newPosts);
+        setPostLoading(false);
+      });
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.fromDate, state.sinceDate]);
@@ -87,28 +91,25 @@ const DashboardTable: React.FC<DashboardTableProps> = ({
           }
         />
       </Flex>
-      {posts.length ? (
+      {postLoading && <Spinner />}
+      {!!posts.length && !postLoading && (
         <PostTable posts={posts} {...state.sourcesStatus} />
-      ) : (
-        <VStack spacing={4} align="center">
-          <Lottie
-            options={{ animationData: workingAnimation }}
-            title="Sad empty box"
-            width={200}
-            height={200}
-          />
-          <Text textAlign="center" fontSize="lg">
-            Uh oh, the social profiles you linked don't seem to have any posts.
-            This can be our problem, though. <br />
-            In fact, we update your amazing posts once every hour, so it is
-            possible that this is our fault. <br />
-            Please wait some more time or, if you believe this is an error,
-            contact us at{' '}
-            <Link href="mailto:gobbees@gmail.com" color="purple.600">
-              gobbees@gmail.com
-            </Link>
-          </Text>
-        </VStack>
+      )}
+      {!posts.length && !postLoading && (
+        <Text textAlign="center" fontSize="lg" p={4}>
+          Uh oh, the social profiles you linked don't seem to have any posts.
+          <br />
+          Try changing the date interval and check that you have published posts
+          on them. <br />
+          This could also be our problem, though. <br />
+          In fact, we update your amazing posts once every hour, so it is
+          possible that our update service hasn't run yet. <br />
+          Please wait some more time or, if you believe this is an error,
+          contact us at{' '}
+          <Link href="mailto:gobbees@gmail.com" color="purple.600">
+            gobbees@gmail.com
+          </Link>
+        </Text>
       )}
     </Flex>
   );
