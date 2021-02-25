@@ -51,7 +51,7 @@ const ProfilesConnector: React.FC<ProfilesConnectorProps> = (
       setSubmitting(false);
     }}
   >
-    {({ handleSubmit, isSubmitting }) => (
+    {({ values, handleSubmit, isSubmitting }) => (
       <Form onSubmit={handleSubmit}>
         <VStack spacing={4} alignItems={{ base: 'center', lg: 'start' }} pt={5}>
           <Text fontWeight="extrabold">Facebook</Text>
@@ -99,7 +99,11 @@ const ProfilesConnector: React.FC<ProfilesConnectorProps> = (
             minW="max-content"
             textColor="white"
             colorScheme="facebook"
-            isDisabled={!props.facebookEnabled && !props.instagramEnabled}
+            isDisabled={
+              !props.facebookEnabled &&
+              !props.instagramEnabled &&
+              !(values.facebookChecked || values.instagramChecked)
+            }
             isLoading={isSubmitting}
           >
             Connect my Facebook Profile
