@@ -18,7 +18,7 @@ const NavBarContainer = (props: { children: React.ReactNode }) => {
   // detect whether user has scrolled the page down by 10px
   React.useEffect(() => {
     const scrollHandler = () => {
-      if (window.pageYOffset > 70) {
+      if (window.pageYOffset > 40) {
         setTop(false);
       } else {
         setTop(true);

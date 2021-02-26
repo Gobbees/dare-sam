@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { HStack, Text } from '@chakra-ui/react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface LogoProps {
   showText: boolean;
@@ -10,10 +11,10 @@ interface LogoProps {
 const Logo: React.FC<LogoProps> = (props: LogoProps) => {
   const logo = (
     <HStack spacing={2} align="center">
-      <Text fontSize="3xl">🔮</Text>
+      <Image src="/logo.svg" width={50} height={50} />
       {props.showText && (
         <Text fontSize="xl" color="purple.600">
-          Crystal Ball
+          DARE-SAM
         </Text>
       )}
     </HStack>
