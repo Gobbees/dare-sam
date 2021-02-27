@@ -24,23 +24,32 @@ const createProfile = async (
       where: { externalId: profile.id },
     });
     if (instagrampProfile) {
-      console.error(
-        `Trying to add an already present Instagram Profile: ${instagrampProfile.id}`,
-      );
-      return res.status(400).json({
-        error:
-          "The Instagram Profile you're trying to add is already present in our systems. Please try with another one.",
+      await User.update(userId, { instagramProfileId: instagrampProfile.id });
+    } else {
+      const createdProfile = await SocialProfile.insert({
+        externalId: profile.id,
+        source: Source.Instagram,
+        name: profile.name,
+        picture: profile.picture,
+        owner: { id: userId },
       });
+      const createdProfileId = createdProfile.identifiers[0].id;
+      await User.update(userId, { instagramProfileId: createdProfileId });
     }
-    const createdProfile = await SocialProfile.insert({
-      externalId: profile.id,
-      source: Source.Instagram,
-      name: profile.name,
-      picture: profile.picture,
-      owner: { id: userId },
-    });
-    const createdProfileId = createdProfile.identifiers[0].id;
-    await User.update(userId, { instagramProfileId: createdProfileId });
+    return res.status(200).end();
+  } catch (error) {
+    console.error(error.message);
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+const deleteProfile = async (res: NextApiResponse, session: Session) => {
+  const { userId } = await NextSession.findOneOrFail({
+    where: { accessToken: session.accessToken },
+    select: ['userId'],
+  });
+  try {
+    await User.update(userId, { instagramProfileId: undefined });
     return res.status(200).end();
   } catch (error) {
     console.error(error.message);
@@ -55,6 +64,9 @@ const profiles = async (
 ) => {
   if (req.method === 'POST') {
     return createProfile(req, res, session);
+  }
+  if (req.method === 'DELETE') {
+    return deleteProfile(res, session);
   }
   return res.status(404).end();
 };

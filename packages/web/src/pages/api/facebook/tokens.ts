@@ -32,6 +32,7 @@ const tokens = async (
       isFacebookAccessTokenLLT: true,
     });
   } else {
+    console.error(data);
     console.log('Error while fetching user long lived token');
     await User.update(userId, {
       facebookAccessToken: token,
