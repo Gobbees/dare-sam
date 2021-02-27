@@ -1,10 +1,10 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Session } from 'next-auth/client';
-import { Source } from '@crystal-ball/common';
 import {
   SocialProfile,
   Post,
   Session as NextSession,
+  User,
 } from '@crystal-ball/database';
 import authenticatedRoute from '../../app/utils/apiRoutes';
 import { Post as ClientPost } from '../../types';
@@ -22,6 +22,10 @@ const posts = async (
     where: { accessToken: session.accessToken },
     select: ['userId'],
   });
+  const user = await User.findOne(userId);
+  if (!user) {
+    return res.status(403).end();
+  }
   const {
     isFacebookSelected,
     isInstagramSelected,
@@ -33,15 +37,20 @@ const posts = async (
     return res.status(400).end();
   }
 
-  const sources: Source[] = [];
+  const profiles: SocialProfile[] = [];
 
   if (isFacebookSelected === 'true') {
-    sources.push(Source.Facebook);
+    const fbPage = await SocialProfile.findOne(user.facebookPageId);
+    if (fbPage) {
+      profiles.push(fbPage);
+    }
   }
   if (isInstagramSelected === 'true') {
-    sources.push(Source.Instagram);
+    const instagramProfile = await SocialProfile.findOne(user.facebookPageId);
+    if (instagramProfile) {
+      profiles.push(instagramProfile);
+    }
   }
-  const profiles = await SocialProfile.findBySourcesAndOwner(sources, userId);
 
   const dbPosts = await Post.findByParentProfiles(
     profiles.map((profile) => profile.id),
