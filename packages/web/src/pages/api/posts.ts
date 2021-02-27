@@ -46,7 +46,9 @@ const posts = async (
     }
   }
   if (isInstagramSelected === 'true') {
-    const instagramProfile = await SocialProfile.findOne(user.facebookPageId);
+    const instagramProfile = await SocialProfile.findOne(
+      user.instagramProfileId,
+    );
     if (instagramProfile) {
       profiles.push(instagramProfile);
     }
