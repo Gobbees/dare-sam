@@ -19,7 +19,7 @@ if (serviceConfig.timeInterval < MIN_TIME_INTERVAL) {
 }
 
 const service = async () => {
-  while (true) {
+  for (;;) {
     console.log(`Service started at ${new Date()}`);
     // create database connection
     if (!TypeOrmManager.isConnected()) {

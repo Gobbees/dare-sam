@@ -8,7 +8,7 @@ enum GraphError {
 const findGraphError = async (
   response: Response,
 ): Promise<GraphError | undefined> => {
-  if (response.status >= 200 && response.status < 300) {
+  if (response.status >= 200 && response.status < 400) {
     // no error
     return undefined;
   }
