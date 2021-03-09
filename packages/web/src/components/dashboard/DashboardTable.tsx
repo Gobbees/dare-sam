@@ -25,8 +25,7 @@ const DashboardTable: React.FC<DashboardTableProps> = ({
   user,
 }: DashboardTableProps) => {
   const defultState: DashboardTableState = {
-    // TODO change it to 30
-    fromDate: subDays(new Date(), 6000), // fetches posts not older than 30 days by default
+    fromDate: subDays(new Date(), 30), // fetches posts not older than 30 days by default
     sinceDate: new Date(), // now
     sourcesStatus: {
       facebookSelected: !!user.facebookPage,
