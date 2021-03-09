@@ -10,11 +10,11 @@ const sendGraphRequest = async (url: string, withGraphEndpoint: boolean) => {
       `${withGraphEndpoint ? facebookGraphEndpoint : ''}${url}`,
     );
     // checks for Graph Errors
-    const managedError = await findGraphError(response);
+    const data = await response.json();
+    const managedError = await findGraphError(response, data);
     if (managedError) {
       return Promise.reject(managedError);
     }
-    const data = await response.json();
     return data;
   } catch (error) {
     console.error(`Encountered error: ${error.message} while fetching ${url}`);
