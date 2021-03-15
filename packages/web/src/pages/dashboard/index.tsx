@@ -62,7 +62,7 @@ const DashboardPage = () => {
   return (
     <Box minW="full" minH="screen">
       <Head>
-        <title>Dashboard | Crystal Ball</title>
+        <title>Dashboard | DARE-SAM</title>
       </Head>
       <Navbar />
       <Box pt={24}>{content}</Box>

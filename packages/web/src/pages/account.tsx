@@ -158,7 +158,7 @@ const AccountPage = () => {
   return (
     <Box minW="full" minH="screen">
       <Head>
-        <title>Account | Crystal Ball</title>
+        <title>Account | DARE-SAM</title>
       </Head>
       <Navbar />
       <Box pt={24}>{content}</Box>
